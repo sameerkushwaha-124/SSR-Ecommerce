@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cartora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
+  <style>
+    html {
+      transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+    }
+  </style>
+</head>
+
+<body class="font-['Rubik'] bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-500 ease-in-out">
+
+  <!-- Navigation Bar -->
+  <nav class="w-full fixed top-0 left-0 z-50 bg-white dark:bg-gray-800 shadow-md px-8 py-4 flex items-center justify-between transition-colors duration-500 ease-in-out">
+    <h3 class="text-2xl font-bold text-blue-500 tracking-wide">Velora</h3>
+
+    <!-- Right side -->
+    <div class="flex items-center gap-6 text-xl text-gray-700 dark:text-gray-300 transition-colors duration-500 ease-in-out">
+      <i class="ri-home-4-line hover:text-blue-500 transition"></i>
+      <i class="ri-shopping-cart-2-line hover:text-blue-500 transition"></i>
+      <i class="ri-user-line hover:text-blue-500 transition"></i>
+
+      <!-- Theme toggle button -->
+      <button id="theme-toggle" class="text-2xl hover:text-blue-500 transition">
+        <i id="theme-icon" class="ri-moon-line"></i>
+      </button>
+    </div>
+  </nav>
+
+  <script>
+    const html = document.documentElement;
+    const toggle = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-icon');
+
+    toggle.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      icon.classList.toggle('ri-moon-line');
+      icon.classList.toggle('ri-sun-line');
+    });
+  </script>
+
+</body>
+
+</html>

@@ -3,22 +3,44 @@ const app = express();
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
+const expressSession = require('express-session');
+const flash = require('connect-flash');
 dotenv.config();
 
-// Middleware to serve static files
+const db = require("./config/mongoose-connection");
+
+
+// Middleware
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(
+    expressSession({
+        resave: false,
+        saveUninitialized: false,
+        secret: process.env.EXPRESS_SESSION_SECRET,
+    })
+);
+app.use(flash());
+
+// Static files and views
+app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Middleware to parse JSON bodies
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(cookieParser());
+const indexRouter = require('./routes/indexRouter');
+const usersRouter = require("./routes/usersRouter");
+const ownersRouter = require("./routes/ownersRouter");
+const productsRouter = require("./routes/productsRouter");
 
-// Routes
-app.get('/', (req, res) => {
-    res.render('index');
-});
+
+// Routes Middleware
+app.use("/", indexRouter);
+app.use("/owner", ownersRouter);
+app.use("/users", usersRouter);
+app.use("/products", productsRouter);
+
+
 
 
 // Route to handle form submission
