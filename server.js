@@ -7,6 +7,7 @@ const expressSession = require('express-session');
 const flash = require('connect-flash');
 dotenv.config();
 
+
 const db = require("./config/mongoose-connection");
 
 
@@ -28,6 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+
 const indexRouter = require('./routes/indexRouter');
 const usersRouter = require("./routes/usersRouter");
 const ownersRouter = require("./routes/ownersRouter");
@@ -39,7 +41,6 @@ app.use("/", indexRouter);
 app.use("/owner", ownersRouter);
 app.use("/users", usersRouter);
 app.use("/products", productsRouter);
-
 
 
 
