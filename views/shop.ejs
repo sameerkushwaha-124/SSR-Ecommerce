@@ -1,54 +1,72 @@
 <%- include('./partials/header') %>   
-<div class="w-full h-screen flex items-start px-20 py-20">
-        <div class="w-[25%] flex h-screen flex-col items-start">
-            <div class="flex items-center gap-2">
-                <h3>sort by</h3>
-                <form action="/shop">
-                    <select class="border-[1px] px-2 py-1" name="sortby" id="">
-                        <option value="popular">Popular</option>
-                        <option value="newest">Newest</option>
-                    </select>
-                </form>
-            </div>
-            <div class="flex flex-col mt-20">
-                <a class="block w-fit mb-2" href="">New Collection</a>
-                <a class="block w-fit mb-2" href="">All Products</a>
-                <a class="block w-fit mb-2" href="">Discounted Products</a>
-            </div>
-            <div class="mt-32">
-                <a class="block w-fit mb-2" href="">Filter by :</a>
-                <a class="block w-fit mb-2" href="">Availability</a>
-                <a class="block w-fit mb-2" href="">Discount</a>
-            </div>
+<div class="w-full min-h-screen flex flex-col lg:flex-row items-start px-4 sm:px-8 md:px-12 lg:px-8 py-10 gap-6 mt-16">
+    <!-- Slim Sidebar Filters -->
+    <div class="w-full lg:w-[15%] flex flex-col bg-gray-50 p-3 rounded-lg shadow-sm lg:sticky lg:top-28 h-fit">
+        <div class="flex items-center gap-2 mb-6">
+            <h3 class="text-gray-700 font-medium text-sm">Sort by</h3>
+            <form action="/shop" method="get" class="flex-1">
+                <select class="w-full text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500" name="sortby" onchange="this.form.submit()">
+                    <option value="popular">Popular</option>
+                    <option value="newest">Newest</option>
+                </select>
+            </form>
         </div>
-        <div class="w-[75%] flex flex-col gap-5 h-screen">
-            <div class="flex items-start gap-5">
-                <% products.forEach(function(product){ %>
-                    <div class="w-60">
-                        <div class="w-full h-52 flex items-center justify-center bg-[<%= product.bgcolor %>]">
-                            <img class="h-[12rem]" src="data:image/jpeg;base64,<%= product.image.toString('base64') %>"
-                                alt="">
-                        </div>
-                        <div
-                            class="flex justify-between bg-[<%= product.panelcolor %>] items-center px-4 py-4 text-[<%= product.textcolor %>]">
-                            <div>
-                                <h3>
-                                    <%= product.name %>
-                                </h3>
-                                <h4>
-                                    ₹<%= product.price - (product.price * (product.discount/100)) %>
-                                    <% if (product.discount > 0) { %>
-                                      <span class="line-through text-gray-400 ml-2">₹<%= product.price %></span>
-                                    <% } %>
-                                  </h4>
-                            </div>
-                            <a class="w-7 h-7 flex items-center justify-center rounded-full bg-white" href="">
-                                <i class="ri-add-line"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <% }) %>
-            </div>
+        
+        <div class="flex flex-col space-y-2">
+            <h4 class="text-xl font-semibold text-gray-800 mb-1">Collections</h4>
+            <a class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 w-fit py-1" href="">New Collection</a>
+            <a class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 w-fit py-1" href="">All Products</a>
+            <a class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 w-fit py-1" href="">Discounted</a>
+        </div>
+        
+        <div class="flex flex-col mt-20 space-y-2">
+            <h4 class="text-xl font-semibold text-gray-800 mb-1">Filters</h4>
+            <a class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 w-fit py-1" href="">Availability</a>
+            <a class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 w-fit py-1" href="">Discount</a>
+            <a class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 w-fit py-1" href="">Price Range</a>
+            <a class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 w-fit py-1" href="">Colors</a>
         </div>
     </div>
-    <%- include('./partials/footer') %>
+
+    <!-- Product Grid - Now 4 columns -->
+    <div class="w-full lg:w-[80%]">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <% products.forEach(function(product){ %>
+                <div class="group relative overflow-hidden rounded-md shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <!-- Product Image Container -->
+                    <div class="w-full aspect-square flex items-center justify-center bg-[<%= product.bgcolor %>]">
+                        <% if (product.image) { %>
+                            <img class="h-full w-full object-contain" src="data:image/jpeg;base64,<%= product.image.toString('base64') %>" alt="<%= product.name %>">
+                        <% } else { %>
+                            <div class="text-center text-xs text-gray-400">No Image</div>
+                        <% } %>
+                        <!-- Add to Cart Button (absolute positioned) -->
+                        <button class="absolute bottom-2 right-2 w-7 h-7 flex items-center justify-center rounded-full bg-white text-gray-800 hover:bg-blue-500 hover:text-white transition-all duration-200 shadow-md opacity-0 group-hover:opacity-100">
+                            <a href="/addtocart/<%= product._id %>">
+                                <i class="ri-shopping-cart-line text-sm"></i>
+                            </a>
+                           
+                        </button>
+                    </div>
+                    
+                    <!-- Product Info -->
+                    <div class="p-3 bg-[<%= product.panelcolor %>] text-[<%= product.textcolor %>]">
+                        <h3 class="font-medium text-sm truncate"><%= product.name %></h3>
+                        <div class="flex flex-wrap items-center mt-1 gap-1">
+                            <span class="font-bold text-sm">
+                                ₹<%= (product.price - (product.price * (product.discount/100))).toFixed(2) %>
+                            </span>
+                            <% if (product.discount > 0) { %>
+                                <span class="line-through text-gray-500 text-xs">₹<%= product.price.toFixed(2) %></span>
+                                <span class="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                                    <%= product.discount %>% off
+                                </span>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+</div>
+<%- include('./partials/footer') %>

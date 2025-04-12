@@ -1,46 +1,116 @@
 const express = require('express');
 const { isLoggedIn } = require('../middlewares/isLoggedIn');
+const productsModel = require('../models/products-model');
 const router = express.Router();
+const userModel = require('../models/users-model');
 
 router.get('/', (req, res) => {
   let error = req.flash('error');
-  res.render('index',{error});
+  res.render('index',{error, loggedIn:false});
 });
 
-
-
-
-router.get('/shop', isLoggedIn, (req, res) => {
-  const products = [
-    {
-      id: 1,
-      name: "Classic White Tee",
-      price: 799,
-      discount: 10,
-      bgcolor: "#ffffff",
-      panelcolor: "#000000",
-      textcolor: "#ffffff",
-      description: "Premium quality cotton t-shirt",
-      image: Buffer.from("white-tshirt-image-data").toString('base64')
-    },
-    {
-      id: 2,
-      name: "Black Jeans",
-      price: 1499,
-      discount: 15,
-      bgcolor: "#f5f5f5",
-      panelcolor: "#333333",
-      textcolor: "#ffffff",
-      description: "Slim fit black denim jeans",
-      image: Buffer.from("black-jeans-image-data").toString('base64')
+router.get('/shop', isLoggedIn,  async (req, res) => {
+  let products =  await productsModel.find();
+  res.render('shop',{products});
+});
+router.get('/addtocart/:productId',isLoggedIn ,async(req,res)=>{
+  const user = await userModel.findOne({email : req.user.email});
+  let index = -1;
+  let object = user.cart.find((item,idx)=>{
+    if(item.product == req.params.productId){
+      index = idx; 
+      return item;
     }
-  ];
-  res.render('shop', {
-    title: 'Shop',
-    products: products,
-    user: req.user
+  })
+  if(object){
+    user.cart[index].quantity +=1;
+  }else{
+    user.cart.push({product : req.params.productId, quantity : 1});
+  }
+  await user.save();
+  
+  res.redirect('/shop');
+})
+// Add From Cart
+router.get('/cart/add/:productId', isLoggedIn, async (req, res) => {
+  const user = await userModel.findOne({email : req.user.email});
+  let index = -1;
+  let object = user.cart.find((item,idx)=>{
+    if(item.product == req.params.productId){
+      index = idx; 
+      return item;
+    }
   });
+  
+  user.cart[index].quantity +=1;
+  
+  await user.save();
+  res.redirect('/cart')
 });
 
+// Remove from cart
+router.get('/cart/remove/:productId', isLoggedIn, async (req, res) => {
+  const user = await userModel.findOne({email : req.user.email});
+  let index = -1;
+  let object = user.cart.find((item,idx)=>{
+    if(item.product == req.params.productId){
+      index = idx; 
+      return item;
+    }
+  });
+  if(user.cart[index].quantity > 1){
+    user.cart[index].quantity -=1;
+  }else{
+    user.cart.splice(index,1);
+  }
+  await user.save();
+  res.redirect('/cart')
+});
+
+router.get('/cart', isLoggedIn, async(req, res) => {
+  try {
+    const user = await userModel.findOne({ email: req.user.email })
+      .populate({
+        path: 'cart.product',
+        // This ensures we still get cart items even if product was deleted
+        options: { 
+          allowNull: true, 
+          defaults: { 
+            name: 'Deleted Product',
+            price: 0,
+            discount: 0,
+            panelcolor: '#f3f4f6',
+            bgcolor: '#ffffff',
+            textcolor: '#000000'
+          }
+        }
+      });
+    
+    if (!user) {
+      req.flash('error', 'User not found');
+      return res.redirect('/login');
+    }
+
+    // Filter out null products (if needed) or handle in template
+    const validCartItems = user.cart.filter(item => item.product !== null);
+    
+    // Optional: Clean up cart by removing deleted products
+    if (validCartItems.length < user.cart.length) {
+      user.cart = validCartItems;
+      await user.save();
+    }
+
+    res.render('cart', {
+      cart: validCartItems,
+      // Or pass the original cart and handle nulls in template:
+      // cart: user.cart
+    });
+    
+  } catch (error) {
+    console.error('Cart error:', error);
+    req.flash('error', 'Failed to load your cart');
+    res.redirect('/');
+  }
+});
 
 module.exports = router;

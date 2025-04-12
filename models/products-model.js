@@ -3,10 +3,9 @@ const mongoose = require('mongoose');
 const productsSchema = new mongoose.Schema({
     name:{
        type:String,
-
     } ,
     image:{
-        type:String
+        type:Buffer
     },
     price:{
         type:Number

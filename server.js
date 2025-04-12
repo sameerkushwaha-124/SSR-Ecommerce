@@ -38,7 +38,7 @@ const productsRouter = require("./routes/productsRouter");
 
 // Routes Middleware
 app.use("/", indexRouter);
-app.use("/owner", ownersRouter);
+app.use("/owners", ownersRouter);
 app.use("/users", usersRouter);
 app.use("/products", productsRouter);
 
