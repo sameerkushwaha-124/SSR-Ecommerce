@@ -43,7 +43,7 @@ app.use("/users", usersRouter);
 app.use("/products", productsRouter);
 
 
-
+console.log(process.env.NODE_ENV);
 // Route to handle form submission
 const PORT = process.env.PORT || 3000;
 app.listen(PORT,()=>{
