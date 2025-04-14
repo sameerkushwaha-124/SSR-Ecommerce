@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const debug = require("debug")("development:mongoose");
 const config = require("config");
 
-if (NODE_ENV === "production") {
+if (process.env.NODE_ENV === "production") {
     mongoose
     .connect(process.env.MONGODB_URI)
     .then(() => {
