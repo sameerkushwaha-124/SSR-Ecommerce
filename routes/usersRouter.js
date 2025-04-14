@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const {registerUser} = require('../controllers/authController');
-const {loginUser} = require('../controllers/authController');
-const {logout} = require('../controllers/authController');
+const {registerUser} = require('../controllers/userAuthController');
+const {loginUser} = require('../controllers/userAuthController');
+const {logout} = require('../controllers/userAuthController');
 
 router.get('/',(req,res)=>{
     res.send("This is the users Routes");

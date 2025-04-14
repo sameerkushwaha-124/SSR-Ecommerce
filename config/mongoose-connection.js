@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
 const debug = require("debug")("development:mongoose");
 
-const mongoURI = "mongodb+srv://sameer:sameer1234@cluster0.bls00ji.mongodb.net/E_COMMERCE?retryWrites=true&w=majority&appName=Cluster0";
-
+const mongoURI = process.env.NODE_ENV==='production'?process.env.MONGO_URI: "mongodb://localhost:27017/SSR-EcommerceDB";
 mongoose
   .connect(mongoURI)
   .then(() => {

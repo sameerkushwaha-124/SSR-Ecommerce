@@ -30,14 +30,14 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 
-const indexRouter = require('./routes/indexRouter');
+const userIndexRouter = require('./routes/userIndexRouter');
 const usersRouter = require("./routes/usersRouter");
 const ownersRouter = require("./routes/ownersRouter");
 const productsRouter = require("./routes/productsRouter");
 
 
 // Routes Middleware
-app.use("/", indexRouter);
+app.use("/", userIndexRouter);
 app.use("/owners", ownersRouter);
 app.use("/users", usersRouter);
 app.use("/products", productsRouter);

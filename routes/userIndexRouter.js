@@ -1,19 +1,19 @@
 const express = require('express');
-const { isLoggedIn } = require('../middlewares/isLoggedIn');
+const { isLoggedInUser } = require('../middlewares/isLoggedIn');
 const productsModel = require('../models/products-model');
 const router = express.Router();
 const userModel = require('../models/users-model');
 
 router.get('/', (req, res) => {
   let error = req.flash('error');
-  res.render('index',{error, loggedIn:false});
+  res.render('userIndex',{error, loggedIn:false});
 });
 
-router.get('/shop', isLoggedIn,  async (req, res) => {
+router.get('/shop', isLoggedInUser,  async (req, res) => {
   let products =  await productsModel.find();
   res.render('shop',{products});
 });
-router.get('/addtocart/:productId',isLoggedIn ,async(req,res)=>{
+router.get('/addtocart/:productId',isLoggedInUser ,async(req,res)=>{
   const user = await userModel.findOne({email : req.user.email});
   let index = -1;
   let object = user.cart.find((item,idx)=>{
@@ -32,7 +32,7 @@ router.get('/addtocart/:productId',isLoggedIn ,async(req,res)=>{
   res.redirect('/shop');
 })
 // Add From Cart
-router.get('/cart/add/:productId', isLoggedIn, async (req, res) => {
+router.get('/cart/add/:productId', isLoggedInUser, async (req, res) => {
   const user = await userModel.findOne({email : req.user.email});
   let index = -1;
   let object = user.cart.find((item,idx)=>{
@@ -49,7 +49,7 @@ router.get('/cart/add/:productId', isLoggedIn, async (req, res) => {
 });
 
 // Remove from cart
-router.get('/cart/remove/:productId', isLoggedIn, async (req, res) => {
+router.get('/cart/remove/:productId', isLoggedInUser, async (req, res) => {
   const user = await userModel.findOne({email : req.user.email});
   let index = -1;
   let object = user.cart.find((item,idx)=>{
@@ -67,7 +67,7 @@ router.get('/cart/remove/:productId', isLoggedIn, async (req, res) => {
   res.redirect('/cart')
 });
 
-router.get('/cart', isLoggedIn, async(req, res) => {
+router.get('/cart', isLoggedInUser, async(req, res) => {
   try {
     const user = await userModel.findOne({ email: req.user.email })
       .populate({

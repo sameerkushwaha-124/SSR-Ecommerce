@@ -24,8 +24,8 @@ module.exports.registerUser = async function (req,res){
                         fullname : fullname
                     });
 
-                    let token = generateToken(createdUser);  
-                    res.cookie("token",token);
+                    let userToken = generateToken(createdUser);  
+                    res.cookie("userToken",userToken);
                     return res.redirect('/shop');
                 }
             });
@@ -43,12 +43,13 @@ module.exports.loginUser = async function(req,res){
 
     if(!user){
         res.flash("Email Or Password is incorrect");
+        console.log("Email Or Password is incorrect");
         res.redirect('/');
     }
     bcrypt.compare(password, user.password, (err, result)=>{
         if(result === true){
-            let token = generateToken(user);
-            res.cookie('token',token);
+            let userToken = generateToken(user);
+            res.cookie('userToken',userToken);
             res.redirect('/shop');
         }else{
             return res.status(401).send("Email Or Password is incorrect");
@@ -57,6 +58,6 @@ module.exports.loginUser = async function(req,res){
 }
 
 module.exports.logout = function(req,res){
-    res.clearCookie('token');
+    res.clearCookie('userToken');
     res.redirect('/');
 }

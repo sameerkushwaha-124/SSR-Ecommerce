@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Velora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  
+</head>
+
+<body>
+
+  <nav
+    class="w-full fixed top-0 left-0 z-50 bg-white dark:bg-gray-800 shadow-md px-8 py-4 flex items-center justify-between transition-colors duration-500 ease-in-out">
+    <!-- Logo with link to home -->
+    <a href="#" class="text-2xl font-bold text-blue-500 tracking-wide hover:text-blue-600 transition">Velora</a>
+    <% var loggedIn=typeof loggedIn !=='undefined' ? loggedIn : true %>
+    <%  if(loggedIn){ %>
+        <a href="/owners/logout">
+          <h5 class="text-red-500 text-xl font-semibold">LogOut</h5>
+        </a>
+        <%  } %>
+      </div>
+  </nav>
+
+
+</body>
+
+</html>
