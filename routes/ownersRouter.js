@@ -56,7 +56,7 @@ if (process.env.NODE_ENV === "development") {
           let ownerToken = generateToken(owner);
          
           res.cookie('ownerToken',ownerToken);
-          res.render('owner-page');
+          res.render('createproducts');
       }else{
           return res.status(401).send("Email Or Password is incorrect");
       }
