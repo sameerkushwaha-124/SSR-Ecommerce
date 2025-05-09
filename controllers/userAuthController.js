@@ -12,7 +12,7 @@ module.exports.registerUser = async function (req,res){
         if(user){
             return res.status(401).send("User Already Exists, Please Login");
         }
-
+        
         bcrypt.genSalt(10, (err, salt)=>{
             bcrypt.hash(password, salt, async (err, hash)=>{
                 if(err){

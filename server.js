@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const expressSession = require('express-session');
 const flash = require('connect-flash');
+const LocalStrategy = require('passport-local');
 dotenv.config();
 
 
@@ -23,7 +24,13 @@ app.use(
     })
 );
 app.use(flash());
-
+app.use((req,res,next)=>{
+    // console.log(req.flash('success'));
+    res.locals.success = req.flash('success');
+    console.log(res.locals.success);
+    res.locals.user = req.user;
+    next();
+})
 // Static files and views
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
