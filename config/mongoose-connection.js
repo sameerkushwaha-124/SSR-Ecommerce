@@ -1,14 +1,13 @@
-const mongoose = require("mongoose");
-const debug = require("debug")("development:mongoose");
+// config/mongoose-connection.js
+const mongoose = require('mongoose');
 
-const mongoURI = process.env.NODE_ENV==='production'?process.env.MONGO_URI: "mongodb://localhost:27017/SSR-EcommerceDB";
-mongoose
-  .connect(mongoURI)
-  .then(() => {
-    debug("connected to database");
-  })
-  .catch((err) => {
-    debug("error in connecting to database : " + err.message);
-  });
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    console.log(`MongoDB connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.log("MongoDB connection error:", error);
+  }
+};
 
-module.exports = mongoose.connection;
+module.exports = connectDB;
