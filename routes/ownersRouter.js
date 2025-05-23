@@ -36,6 +36,7 @@ if (process.env.NODE_ENV === "development") {
       res.cookie("ownerToken", ownerToken);
       res.status(201).send(createdOwner);
     } catch (err) {
+      if(process.env.NODE_ENV !== "production") 
       console.error("Owner creation error:", err.message);
       res.status(500).send("Server Error");
     }

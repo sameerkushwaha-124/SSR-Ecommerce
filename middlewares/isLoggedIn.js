@@ -18,7 +18,9 @@ module.exports.isLoggedInUser = async function(req, res, next) {
         next();
     } catch (err) {
         req.flash("error", "Authentication failed. Please login again.");
-        console.error("Error in isLoggedInUser:", err.message);
+        if (process.env.NODE_ENV !== "production") {
+            console.error("Error in isLoggedInUser:", err.message);
+        }
         res.redirect('/');
     }
 };
@@ -39,7 +41,9 @@ module.exports.isLoggedInAdmin = async function(req, res, next) {
         next();
     } catch (err) {
         req.flash("error", "Authentication failed. Please login again.");
-        console.error("Error in isLoggedInAdmin:", err.message);
+        if (process.env.NODE_ENV !== "production") {
+            console.error("Error in isLoggedInAdmin:", err.message);
+        }
         res.redirect('/owners');
     }
 };

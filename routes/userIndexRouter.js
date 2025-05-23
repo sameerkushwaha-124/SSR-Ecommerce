@@ -107,7 +107,8 @@ router.get('/cart', isLoggedInUser, async(req, res) => {
     });
     
   } catch (error) {
-    console.error('Cart error:', error);
+    if(process.env.NODE_ENV !== "production") 
+      console.error('Cart error:', error);
     req.flash('error', 'Failed to load your cart');
     res.redirect('/');
   }
