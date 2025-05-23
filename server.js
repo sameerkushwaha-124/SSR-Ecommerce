@@ -5,7 +5,6 @@ const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const expressSession = require('express-session');
 const flash = require('connect-flash');
-const LocalStrategy = require('passport-local');
 dotenv.config();
 
 
