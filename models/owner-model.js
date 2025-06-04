@@ -6,6 +6,11 @@ const ownerSchema = mongoose.Schema({
         minLength:3,
         trim:true
     },
+    role:{
+        type:String,
+        required:true,
+        default:"owner"
+    },
     email:{
         type:String
     },

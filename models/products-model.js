@@ -10,6 +10,11 @@ const productsSchema = new mongoose.Schema({
     price:{
         type:Number
     },
+    role:{
+        type:String,
+        required:true,
+        default:"product"
+    },
     
     discount:{
         type:Number,

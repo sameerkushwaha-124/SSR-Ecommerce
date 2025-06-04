@@ -65,7 +65,8 @@ if (process.env.NODE_ENV === "development") {
 
       const ownerToken = generateToken(owner);
       res.cookie("ownerToken", ownerToken);
-      return res.redirect("/owners/create-products");
+      const success = req.flash("success");
+      return res.render("createproducts", { success });
     } catch (err) {
       console.error("Login Error:", err.message);
       req.flash("error", "Something went wrong during login");
