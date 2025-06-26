@@ -28,9 +28,10 @@ app.use(
 
 app.use(flash());
 app.use((req, res, next) => {
-  // console.log(req.flash('success'));
+  // Make flash messages available to all templates
   res.locals.success = req.flash("success");
-  console.log(res.locals.success);
+  res.locals.error = req.flash("error");
+  res.locals.info = req.flash("info");
   res.locals.user = req.user;
   next();
 });
@@ -51,12 +52,29 @@ app.use("/users", usersRouter);
 app.use("/products", productsRouter);
 
 
-if(process.env.NODE_ENV === "production") 
-console.log(process.env.NODE_ENV);
-// Route to handle form submission
-const PORT = process.env.PORT || 3000;
+// Production environment check
+if(process.env.NODE_ENV === "production") {
+  console.log("Running in production mode");
+}
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err.stack);
+  res.status(500).render('error', {
+    message: process.env.NODE_ENV === 'production' ? 'Something went wrong!' : err.message
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).render('404', { url: req.originalUrl });
+});
+
+// Start server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
   if (process.env.NODE_ENV !== "production") {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Local URL: http://localhost:${PORT}`);
   }
 });

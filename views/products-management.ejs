@@ -1,0 +1,333 @@
+<%- include('./partials/owner-header') %>
+<%- include('./partials/flash-messages') %>
+
+<div class="min-h-screen pt-20 pb-10" style="background-color: var(--bg-primary);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold" style="color: var(--text-primary);">Products Management</h1>
+                    <p class="mt-2" style="color: var(--text-tertiary);">Manage all your products</p>
+                </div>
+                <a href="/owners/create-products" 
+                   class="px-6 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl relative overflow-hidden group"
+                   style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; border: 1px solid var(--accent-primary);">
+                    <span class="relative z-10 flex items-center">
+                        <i class="ri-add-line mr-2"></i>Add New Product
+                    </span>
+                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                         style="background: linear-gradient(135deg, var(--accent-hover), var(--accent-primary));"></div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Static Search and Filter Bar -->
+        <div class="rounded-xl shadow-sm p-6 mb-8 backdrop-blur-sm sticky top-20 z-40"
+             style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+            <div class="flex flex-col md:flex-row gap-4">
+                <!-- Search -->
+                <div class="flex-1">
+                    <form action="/owners/products" method="get" class="flex gap-4">
+                        <div class="flex-1 relative">
+                            <input type="text" name="search" value="<%= searchQuery %>" 
+                                   placeholder="Search products..." 
+                                   class="w-full pl-10 pr-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                                   style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"
+                                   onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 2px var(--accent-primary)33';"
+                                   onblur="this.style.borderColor='var(--border-primary)'; this.style.boxShadow='none';">
+                            <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2" style="color: var(--text-tertiary);"></i>
+                        </div>
+                        
+                        <!-- Sort -->
+                        <select name="sortby" 
+                                class="px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                                style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"
+                                onchange="this.form.submit()">
+                            <option value="newest" <%= currentSort === 'newest' ? 'selected' : '' %>>Newest First</option>
+                            <option value="oldest" <%= currentSort === 'oldest' ? 'selected' : '' %>>Oldest First</option>
+                            <option value="name" <%= currentSort === 'name' ? 'selected' : '' %>>Name A-Z</option>
+                            <option value="price-low" <%= currentSort === 'price-low' ? 'selected' : '' %>>Price: Low to High</option>
+                            <option value="price-high" <%= currentSort === 'price-high' ? 'selected' : '' %>>Price: High to Low</option>
+                        </select>
+                        
+                        <button type="submit" 
+                                class="px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105"
+                                style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white;">
+                            <i class="ri-search-line"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Count -->
+        <div class="mb-6">
+            <p class="text-sm" style="color: var(--text-tertiary);">
+                Showing <%= products.length %> product<%= products.length !== 1 ? 's' : '' %>
+                <% if (searchQuery) { %>
+                    for "<%= searchQuery %>"
+                    <a href="/owners/products" class="ml-2 text-sm underline" style="color: var(--accent-primary);">Clear search</a>
+                <% } %>
+            </p>
+        </div>
+
+        <!-- Products Grid -->
+        <% if (products.length === 0) { %>
+            <!-- Empty State -->
+            <div class="text-center py-16">
+                <i class="ri-product-hunt-line text-6xl mb-6" style="color: var(--text-tertiary);"></i>
+                <h3 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">No products found</h3>
+                <% if (searchQuery) { %>
+                    <p class="mb-8" style="color: var(--text-tertiary);">
+                        No products match your search for "<%= searchQuery %>"
+                    </p>
+                    <a href="/owners/products" 
+                       class="inline-block px-8 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 mr-4"
+                       style="background-color: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-primary);">
+                        View All Products
+                    </a>
+                <% } else { %>
+                    <p class="mb-8" style="color: var(--text-tertiary);">You haven't created any products yet.</p>
+                <% } %>
+                <a href="/owners/create-products" 
+                   class="inline-block px-8 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105"
+                   style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white;">
+                    <i class="ri-add-line mr-2"></i>Create Your First Product
+                </a>
+            </div>
+        <% } else { %>
+            <!-- Products Table -->
+            <div class="rounded-xl shadow-sm overflow-hidden backdrop-blur-sm" 
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead style="background-color: var(--bg-tertiary);">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-tertiary);">Product</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-tertiary);">Price</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-tertiary);">Discount</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-tertiary);">Created</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-tertiary);">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y" style="divide-color: var(--border-primary);">
+                            <% products.forEach(function(product) { %>
+                                <tr class="hover:bg-opacity-50 transition-colors duration-200" 
+                                    style="hover:background-color: var(--bg-tertiary);" 
+                                    data-product-id="<%= product._id %>">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-16 h-16 rounded-lg overflow-hidden flex items-center justify-center mr-4"
+                                                 style="background-color: <%= product.bgcolor %>;">
+                                                <% if (product.image) { %>
+                                                    <img src="data:image/jpeg;base64,<%= product.image.toString('base64') %>" 
+                                                         alt="<%= product.name %>" class="w-full h-full object-contain">
+                                                <% } else { %>
+                                                    <i class="ri-image-line text-gray-400 text-xl"></i>
+                                                <% } %>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium" style="color: var(--text-primary);"><%= product.name %></div>
+                                                <div class="text-sm" style="color: var(--text-tertiary);"><%= product.category || 'Uncategorized' %></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium" style="color: var(--text-primary);">₹<%= product.price %></div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <% if (product.discount > 0) { %>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                                  style="background-color: var(--success-100); color: var(--success-800);">
+                                                <%= product.discount %>% OFF
+                                            </span>
+                                        <% } else { %>
+                                            <span class="text-sm" style="color: var(--text-tertiary);">No discount</span>
+                                        <% } %>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm" style="color: var(--text-secondary);">
+                                            <%= new Date(product.createdAt).toLocaleDateString() %>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex items-center space-x-2">
+                                            <button onclick="editProduct('<%= product._id %>')" 
+                                                    class="p-2 rounded-lg transition-all duration-200 hover:scale-110"
+                                                    style="color: var(--accent-primary); background-color: var(--bg-tertiary);"
+                                                    title="Edit Product">
+                                                <i class="ri-edit-line"></i>
+                                            </button>
+                                            <button onclick="deleteProduct('<%= product._id %>', '<%= product.name %>')" 
+                                                    class="p-2 rounded-lg transition-all duration-200 hover:scale-110"
+                                                    style="color: var(--error-600); background-color: var(--bg-tertiary);"
+                                                    title="Delete Product">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="rounded-xl p-6 max-w-md w-full mx-4 backdrop-blur-sm"
+         style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center mr-4"
+                 style="background: linear-gradient(135deg, var(--error-500), var(--error-600));">
+                <i class="ri-error-warning-line text-white text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold" style="color: var(--text-primary);">Delete Product</h3>
+                <p class="text-sm" style="color: var(--text-tertiary);">This action cannot be undone</p>
+            </div>
+        </div>
+        <p class="mb-6" style="color: var(--text-secondary);">
+            Are you sure you want to delete "<span id="productName"></span>"?
+        </p>
+        <div class="flex justify-end space-x-3">
+            <button onclick="closeDeleteModal()"
+                    class="px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                    style="background-color: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-primary);">
+                Cancel
+            </button>
+            <button id="confirmDelete"
+                    class="px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                    style="background: linear-gradient(135deg, var(--error-500), var(--error-600)); color: white;">
+                Delete Product
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let productToDelete = null;
+
+    function editProduct(productId) {
+        // For now, redirect to create page with edit mode
+        // In a full implementation, you'd create a separate edit page
+        window.location.href = `/owners/create-products?edit=${productId}`;
+    }
+
+    function deleteProduct(productId, productName) {
+        productToDelete = productId;
+        document.getElementById('productName').textContent = productName;
+        document.getElementById('deleteModal').classList.remove('hidden');
+        document.getElementById('deleteModal').classList.add('flex');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+        document.getElementById('deleteModal').classList.remove('flex');
+        productToDelete = null;
+    }
+
+    document.getElementById('confirmDelete').addEventListener('click', async function() {
+        if (!productToDelete) return;
+
+        try {
+            const response = await fetch(`/owners/products/delete/${productToDelete}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Remove the product row from the table
+                const productRow = document.querySelector(`[data-product-id="${productToDelete}"]`);
+                if (productRow) {
+                    productRow.style.transition = 'all 0.3s ease-out';
+                    productRow.style.opacity = '0';
+                    productRow.style.transform = 'translateX(-100%)';
+                    setTimeout(() => {
+                        productRow.remove();
+                        // Check if table is empty and reload if needed
+                        const remainingRows = document.querySelectorAll('[data-product-id]');
+                        if (remainingRows.length === 0) {
+                            window.location.reload();
+                        }
+                    }, 300);
+                }
+
+                showFlashMessage('success', data.message);
+                closeDeleteModal();
+            } else {
+                showFlashMessage('error', data.message);
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            showFlashMessage('error', 'Failed to delete product. Please try again.');
+        }
+    });
+
+    function showFlashMessage(type, message) {
+        const flashMessage = document.createElement('div');
+        flashMessage.className = `flash-message fixed top-20 left-1/2 transform -translate-x-1/2 p-4 pr-12 rounded-xl z-50 shadow-2xl min-w-80 max-w-md backdrop-blur-lg`;
+
+        let bgStyle, iconClass;
+        if (type === 'success') {
+            bgStyle = 'background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);';
+            iconClass = 'ri-check-circle-line';
+        } else {
+            bgStyle = 'background: linear-gradient(135deg, #ef4444, #dc2626); border: 1px solid #f87171; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);';
+            iconClass = 'ri-error-warning-line';
+        }
+
+        flashMessage.style.cssText = bgStyle;
+        flashMessage.innerHTML = `
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="${iconClass} text-white text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <span class="block text-white font-medium">${message}</span>
+                </div>
+            </div>
+            <button class="absolute top-2 right-3 text-white hover:text-gray-200 text-xl font-bold transition-colors duration-200" onclick="this.parentElement.remove()">&times;</button>
+        `;
+
+        document.body.appendChild(flashMessage);
+
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            if (flashMessage.parentNode) {
+                flashMessage.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                flashMessage.style.transform = 'translateX(-50%) translateY(-20px)';
+                flashMessage.style.opacity = '0';
+                setTimeout(() => {
+                    if (flashMessage.parentNode) {
+                        flashMessage.parentNode.removeChild(flashMessage);
+                    }
+                }, 400);
+            }
+        }, 3000);
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDeleteModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeDeleteModal();
+        }
+    });
+</script>
+
+<%- include('./partials/footer') %>

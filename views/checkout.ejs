@@ -1,0 +1,273 @@
+<%- include('./partials/user-header') %>
+<%- include('./partials/flash-messages') %>
+
+<div class="min-h-screen pt-20 pb-10" style="background-color: var(--bg-primary);">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Checkout Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold" style="color: var(--text-primary);">Checkout</h1>
+            <p class="text-lg mt-2" style="color: var(--text-secondary);">Complete your purchase</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Order Summary -->
+            <div class="rounded-xl shadow-sm p-6 backdrop-blur-sm"
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <h2 class="text-xl font-semibold mb-6" style="color: var(--text-primary);">Order Summary</h2>
+                
+                <!-- Product Item -->
+                <div class="flex items-center space-x-4 p-4 rounded-lg mb-6"
+                     style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary);">
+                    <div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                        <% if (item.product.imageUrl) { %>
+                            <img src="<%= item.product.imageUrl %>"
+                                 alt="<%= item.product.name %>"
+                                 class="w-full h-full object-cover">
+                        <% } else { %>
+                            <div class="w-full h-full flex items-center justify-center"
+                                 style="background-color: var(--bg-tertiary);">
+                                <i class="ri-image-line text-gray-400"></i>
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold" style="color: var(--text-primary);"><%= item.product.name %></h3>
+                        <div class="text-sm mt-1" style="color: var(--text-secondary);">
+                            <% if (item.selectedColor) { %>
+                                <span>Color: <%= item.selectedColor %></span>
+                            <% } %>
+                            <% if (item.selectedSize) { %>
+                                <span class="ml-3">Size: <%= item.selectedSize %></span>
+                            <% } %>
+                        </div>
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="text-sm" style="color: var(--text-secondary);">Qty: <%= item.quantity %></span>
+                            <span class="font-semibold" style="color: var(--text-primary);">₹<%= item.price.toLocaleString() %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Total -->
+                <div class="border-t pt-4" style="border-color: var(--border-primary);">
+                    <div class="flex justify-between items-center mb-2">
+                        <span style="color: var(--text-secondary);">Subtotal:</span>
+                        <span style="color: var(--text-primary);">₹<%= item.total.toLocaleString() %></span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span style="color: var(--text-secondary);">Shipping:</span>
+                        <span style="color: var(--text-primary);">Free</span>
+                    </div>
+                    <div class="flex justify-between items-center text-lg font-semibold pt-2 border-t"
+                         style="border-color: var(--border-primary); color: var(--text-primary);">
+                        <span>Total:</span>
+                        <span>₹<%= item.total.toLocaleString() %></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="rounded-xl shadow-sm p-6 backdrop-blur-sm"
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <h2 class="text-xl font-semibold mb-6" style="color: var(--text-primary);">Payment Details</h2>
+                
+                <form id="checkoutForm" class="space-y-6">
+                    <!-- Shipping Address -->
+                    <div>
+                        <h3 class="text-lg font-medium mb-4" style="color: var(--text-primary);">Shipping Address</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Full Name</label>
+                                <input type="text" name="fullName" value="<%= user.fullname %>" required
+                                       class="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                                       style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Phone</label>
+                                <input type="tel" name="phone" value="<%= user.contact || '' %>" required
+                                       class="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                                       style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);">
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Address</label>
+                            <textarea name="address" rows="3" required placeholder="Enter your full address"
+                                      class="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                                      style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div>
+                        <h3 class="text-lg font-medium mb-4" style="color: var(--text-primary);">Payment Method</h3>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200"
+                                   style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary);">
+                                <input type="radio" name="paymentMethod" value="razorpay" checked class="mr-3">
+                                <div class="flex items-center">
+                                    <i class="ri-bank-card-line text-xl mr-3" style="color: var(--accent-primary);"></i>
+                                    <div>
+                                        <div class="font-medium" style="color: var(--text-primary);">Razorpay</div>
+                                        <div class="text-sm" style="color: var(--text-secondary);">Credit/Debit Card, UPI, Net Banking</div>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200"
+                                   style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary);">
+                                <input type="radio" name="paymentMethod" value="cod" class="mr-3">
+                                <div class="flex items-center">
+                                    <i class="ri-money-dollar-circle-line text-xl mr-3" style="color: var(--accent-primary);"></i>
+                                    <div>
+                                        <div class="font-medium" style="color: var(--text-primary);">Cash on Delivery</div>
+                                        <div class="text-sm" style="color: var(--text-secondary);">Pay when you receive</div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Place Order Button -->
+                    <button type="submit" id="placeOrderBtn"
+                            class="w-full py-4 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                            style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white;">
+                        <i class="ri-secure-payment-line mr-2"></i>
+                        Place Order - ₹<%= item.total.toLocaleString() %>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Back to Product -->
+        <div class="mt-8 text-center">
+            <a href="/product/<%= item.product._id %>" 
+               class="inline-flex items-center px-6 py-3 rounded-lg font-medium transition-all duration-200"
+               style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-primary);">
+                <i class="ri-arrow-left-line mr-2"></i>
+                Back to Product
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('checkoutForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const button = document.getElementById('placeOrderBtn');
+    const originalContent = button.innerHTML;
+
+    // Show loading state
+    button.innerHTML = '<i class="ri-loader-4-line animate-spin mr-2"></i>Processing...';
+    button.disabled = true;
+
+    try {
+        const formData = new FormData(this);
+        const paymentMethod = formData.get('paymentMethod');
+
+        if (paymentMethod === 'razorpay') {
+            // Razorpay is not implemented yet
+            showFlashMessage('error', 'Razorpay payment is not available yet. Please select Cash on Delivery.');
+            button.innerHTML = originalContent;
+            button.disabled = false;
+            return;
+        } else if (paymentMethod === 'cod') {
+            processOrder('cod');
+        } else {
+            showFlashMessage('error', 'Please select a valid payment method.');
+            button.innerHTML = originalContent;
+            button.disabled = false;
+            return;
+        }
+    } catch (error) {
+        console.error('Checkout error:', error);
+        showFlashMessage('error', 'Failed to process order');
+        button.innerHTML = originalContent;
+        button.disabled = false;
+    }
+});
+
+async function processOrder(method) {
+    try {
+        const formData = new FormData(document.getElementById('checkoutForm'));
+
+        const response = await fetch('/place-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                fullName: formData.get('fullName'),
+                phone: formData.get('phone'),
+                address: formData.get('address'),
+                paymentMethod: method
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showFlashMessage('success', `Order placed successfully! Tracking: ${data.trackingNumber}`);
+            setTimeout(() => {
+                window.location.href = '/account?tab=orders';
+            }, 3000);
+        } else {
+            showFlashMessage('error', data.message || 'Failed to place order');
+            const button = document.getElementById('placeOrderBtn');
+            button.innerHTML = '<i class="ri-secure-payment-line mr-2"></i>Place Order - ₹<%= item.total.toLocaleString() %>';
+            button.disabled = false;
+        }
+    } catch (error) {
+        console.error('Order processing error:', error);
+        showFlashMessage('error', 'Failed to place order');
+        const button = document.getElementById('placeOrderBtn');
+        button.innerHTML = '<i class="ri-secure-payment-line mr-2"></i>Place Order - ₹<%= item.total.toLocaleString() %>';
+        button.disabled = false;
+    }
+}
+
+function showFlashMessage(type, message) {
+    const flashMessage = document.createElement('div');
+    flashMessage.className = `flash-message fixed top-20 left-1/2 transform -translate-x-1/2 p-4 pr-12 rounded-xl z-50 shadow-2xl min-w-80 max-w-md backdrop-blur-lg`;
+
+    let bgStyle, iconClass;
+    if (type === 'success') {
+        bgStyle = 'background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399;';
+        iconClass = 'ri-check-circle-line';
+    } else if (type === 'info') {
+        bgStyle = 'background: linear-gradient(135deg, #3b82f6, #2563eb); border: 1px solid #60a5fa;';
+        iconClass = 'ri-information-line';
+    } else {
+        bgStyle = 'background: linear-gradient(135deg, #ef4444, #dc2626); border: 1px solid #f87171;';
+        iconClass = 'ri-error-warning-line';
+    }
+
+    flashMessage.style.cssText = bgStyle;
+    flashMessage.innerHTML = `
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <i class="${iconClass} text-white text-xl"></i>
+            </div>
+            <div class="ml-3">
+                <span class="block text-white font-medium">${message}</span>
+            </div>
+        </div>
+        <button class="absolute top-2 right-3 text-white hover:text-gray-200 text-xl font-bold transition-colors duration-200" onclick="this.parentElement.remove()">&times;</button>
+    `;
+
+    document.body.appendChild(flashMessage);
+
+    setTimeout(() => {
+        if (flashMessage.parentNode) {
+            flashMessage.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            flashMessage.style.transform = 'translateX(-50%) translateY(-20px)';
+            flashMessage.style.opacity = '0';
+            setTimeout(() => {
+                if (flashMessage.parentNode) {
+                    flashMessage.parentNode.removeChild(flashMessage);
+                }
+            }, 400);
+        }
+    }, 4000);
+}
+</script>
+
+<%- include('./partials/footer') %>

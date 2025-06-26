@@ -1,0 +1,274 @@
+<%- include('./partials/owner-header') %>
+<%- include('./partials/flash-messages') %>
+
+<div class="min-h-screen pt-20 pb-10" style="background-color: var(--bg-primary);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8 rounded-xl shadow-sm p-6 backdrop-blur-sm"
+             style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold" style="color: var(--text-primary);">Orders Management</h1>
+                    <p class="text-lg mt-2" style="color: var(--text-secondary);">Manage customer orders and deliveries</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <% 
+                        const pendingOrders = orders.filter(order => order.orderStatus === 'pending' || order.orderStatus === 'confirmed');
+                        const deliveredOrders = orders.filter(order => order.orderStatus === 'delivered');
+                        const totalRevenue = deliveredOrders.reduce((sum, order) => sum + order.total, 0);
+                    %>
+                    <div class="px-4 py-2 rounded-lg" style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary);">
+                        <span class="text-sm font-medium" style="color: var(--text-secondary);">Total Orders: </span>
+                        <span class="text-lg font-bold" style="color: var(--accent-primary);"><%= orders.length %></span>
+                    </div>
+                    <div class="px-4 py-2 rounded-lg" style="background-color: #fef3c7; border: 1px solid #f59e0b;">
+                        <span class="text-sm font-medium" style="color: #92400e;">Pending: </span>
+                        <span class="text-lg font-bold" style="color: #92400e;"><%= pendingOrders.length %></span>
+                    </div>
+                    <div class="px-4 py-2 rounded-lg" style="background-color: #dcfce7; border: 1px solid #34d399;">
+                        <span class="text-sm font-medium" style="color: #166534;">Revenue: </span>
+                        <span class="text-lg font-bold" style="color: #166534;">₹<%= totalRevenue.toLocaleString() %></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="rounded-xl shadow-sm backdrop-blur-sm overflow-hidden"
+             style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead style="background-color: var(--bg-tertiary);">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-sm font-semibold" style="color: var(--text-primary);">Order</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold" style="color: var(--text-primary);">Customer</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold" style="color: var(--text-primary);">Product</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold" style="color: var(--text-primary);">Amount</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold" style="color: var(--text-primary);">Status</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold" style="color: var(--text-primary);">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (orders.length === 0) { %>
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <i class="ri-shopping-bag-line text-4xl mb-4" style="color: var(--text-tertiary);"></i>
+                                        <p class="text-lg font-medium" style="color: var(--text-secondary);">No orders found</p>
+                                        <p class="text-sm" style="color: var(--text-tertiary);">Orders will appear here when customers make purchases</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% } else { %>
+                            <% orders.forEach((order, index) => { %>
+                                <tr class="border-b transition-colors duration-200 hover:bg-opacity-50"
+                                    style="border-color: var(--border-primary);">
+                                    <td class="px-6 py-4">
+                                        <div>
+                                            <div class="font-medium" style="color: var(--text-primary);">
+                                                #<%= order.trackingNumber %>
+                                            </div>
+                                            <div class="text-sm" style="color: var(--text-tertiary);">
+                                                <%= new Date(order.createdAt).toLocaleDateString() %>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div>
+                                            <div class="font-medium" style="color: var(--text-primary);">
+                                                <%= order.user.fullname %>
+                                            </div>
+                                            <div class="text-sm" style="color: var(--text-tertiary);">
+                                                <%= order.user.email %>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
+                                                 style="border: 2px solid var(--border-primary);">
+                                                <% if (order.product.imageUrl) { %>
+                                                    <img src="<%= order.product.imageUrl %>"
+                                                         alt="<%= order.product.name %>"
+                                                         class="w-full h-full object-cover">
+                                                <% } else { %>
+                                                    <div class="w-full h-full flex items-center justify-center"
+                                                         style="background-color: var(--bg-tertiary);">
+                                                        <i class="ri-image-line text-gray-400"></i>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                            <div>
+                                                <div class="font-medium" style="color: var(--text-primary);">
+                                                    <%= order.product.name %>
+                                                </div>
+                                                <div class="text-sm" style="color: var(--text-tertiary);">
+                                                    Qty: <%= order.quantity %>
+                                                    <% if (order.selectedColor) { %>
+                                                        • <%= order.selectedColor %>
+                                                    <% } %>
+                                                    <% if (order.selectedSize) { %>
+                                                        • <%= order.selectedSize %>
+                                                    <% } %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="font-semibold" style="color: var(--text-primary);">
+                                            ₹<%= order.total.toLocaleString() %>
+                                        </div>
+                                        <div class="text-sm" style="color: var(--text-tertiary);">
+                                            <%= order.paymentMethod.toUpperCase() %>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <% 
+                                            let statusColor, statusBg;
+                                            switch(order.orderStatus) {
+                                                case 'pending':
+                                                    statusColor = '#92400e';
+                                                    statusBg = '#fef3c7';
+                                                    break;
+                                                case 'confirmed':
+                                                    statusColor = '#1e40af';
+                                                    statusBg = '#dbeafe';
+                                                    break;
+                                                case 'shipped':
+                                                    statusColor = '#7c2d12';
+                                                    statusBg = '#fed7aa';
+                                                    break;
+                                                case 'delivered':
+                                                    statusColor = '#166534';
+                                                    statusBg = '#dcfce7';
+                                                    break;
+                                                case 'cancelled':
+                                                    statusColor = '#dc2626';
+                                                    statusBg = '#fef2f2';
+                                                    break;
+                                                default:
+                                                    statusColor = '#6b7280';
+                                                    statusBg = '#f3f4f6';
+                                            }
+                                        %>
+                                        <span class="px-3 py-1 rounded-full text-xs font-medium"
+                                              style="background-color: <%= statusBg %>; color: <%= statusColor %>;">
+                                            <%= order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1) %>
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center space-x-2">
+                                            <% if (order.orderStatus !== 'delivered' && order.orderStatus !== 'cancelled') { %>
+                                                <select onchange="updateOrderStatus('<%= order._id %>', this.value)"
+                                                        class="px-3 py-1 rounded-lg text-sm transition-all duration-200"
+                                                        style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);">
+                                                    <option value="">Update Status</option>
+                                                    <% if (order.orderStatus === 'pending') { %>
+                                                        <option value="confirmed">Confirm</option>
+                                                    <% } %>
+                                                    <% if (order.orderStatus === 'confirmed') { %>
+                                                        <option value="shipped">Ship</option>
+                                                    <% } %>
+                                                    <% if (order.orderStatus === 'shipped') { %>
+                                                        <option value="delivered">Deliver</option>
+                                                    <% } %>
+                                                    <option value="cancelled">Cancel</option>
+                                                </select>
+                                            <% } else { %>
+                                                <span class="text-sm" style="color: var(--text-tertiary);">
+                                                    <% if (order.orderStatus === 'delivered') { %>
+                                                        <i class="ri-check-circle-line mr-1"></i>Completed
+                                                    <% } else { %>
+                                                        <i class="ri-close-circle-line mr-1"></i>Cancelled
+                                                    <% } %>
+                                                </span>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function updateOrderStatus(orderId, status) {
+    if (!status) return;
+    
+    if (!confirm(`Are you sure you want to mark this order as ${status}?`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/owners/orders/update-status/${orderId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: status })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showFlashMessage('success', data.message);
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showFlashMessage('error', data.message || 'Failed to update order status');
+        }
+    } catch (error) {
+        console.error('Update status error:', error);
+        showFlashMessage('error', 'Failed to update order status');
+    }
+}
+
+function showFlashMessage(type, message) {
+    const flashMessage = document.createElement('div');
+    flashMessage.className = `flash-message fixed top-20 left-1/2 transform -translate-x-1/2 p-4 pr-12 rounded-xl z-50 shadow-2xl min-w-80 max-w-md backdrop-blur-lg`;
+
+    let bgStyle, iconClass;
+    if (type === 'success') {
+        bgStyle = 'background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399;';
+        iconClass = 'ri-check-circle-line';
+    } else {
+        bgStyle = 'background: linear-gradient(135deg, #ef4444, #dc2626); border: 1px solid #f87171;';
+        iconClass = 'ri-error-warning-line';
+    }
+
+    flashMessage.style.cssText = bgStyle;
+    flashMessage.innerHTML = `
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <i class="${iconClass} text-white text-xl"></i>
+            </div>
+            <div class="ml-3">
+                <span class="block text-white font-medium">${message}</span>
+            </div>
+        </div>
+        <button class="absolute top-2 right-3 text-white hover:text-gray-200 text-xl font-bold transition-colors duration-200" onclick="this.parentElement.remove()">&times;</button>
+    `;
+
+    document.body.appendChild(flashMessage);
+
+    setTimeout(() => {
+        if (flashMessage.parentNode) {
+            flashMessage.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            flashMessage.style.transform = 'translateX(-50%) translateY(-20px)';
+            flashMessage.style.opacity = '0';
+            setTimeout(() => {
+                if (flashMessage.parentNode) {
+                    flashMessage.parentNode.removeChild(flashMessage);
+                }
+            }, 400);
+        }
+    }, 3000);
+}
+</script>
+
+<%- include('./partials/footer') %>

@@ -26,6 +26,10 @@ const ownerSchema = mongoose.Schema({
     },
     gtn:{
         type:String
+    },
+    totalEarnings:{
+        type:Number,
+        default:0
     }
 })
 

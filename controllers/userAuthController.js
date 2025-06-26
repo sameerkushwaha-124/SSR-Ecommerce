@@ -7,6 +7,17 @@ module.exports.registerUser = async function (req, res) {
     try {
         const { email, password, fullname } = req.body;
 
+        // Validate input
+        if (!email || !password || !fullname) {
+            req.flash("error", "All fields are required.");
+            return res.redirect('/');
+        }
+
+        if (password.length < 6) {
+            req.flash("error", "Password must be at least 6 characters long.");
+            return res.redirect('/');
+        }
+
         const existingUser = await userModel.findOne({ email });
         if (existingUser) {
             req.flash("error", "User already exists. Please login.");
@@ -24,10 +35,21 @@ module.exports.registerUser = async function (req, res) {
 
         const userToken = generateToken(createdUser);
         res.cookie("userToken", userToken);
+        req.flash("success", "Registration successful! Welcome to Velora!");
         return res.redirect('/shop');
     } catch (err) {
         console.error("Registration Error:", err.message);
-        req.flash("error", "Something went wrong during registration.");
+
+        // Handle specific MongoDB errors
+        if (err.name === 'ValidationError') {
+            req.flash("error", "Please check your input and try again.");
+        } else if (err.code === 11000) {
+            req.flash("error", "Email already exists. Please use a different email.");
+        } else if (err.message.includes('MongooseServerSelectionError')) {
+            req.flash("error", "Database connection error. Please try again later.");
+        } else {
+            req.flash("error", "Registration failed. Please try again.");
+        }
         return res.redirect('/');
     }
 };
@@ -48,6 +70,12 @@ module.exports.loginUser = async function (req, res) {
             req.flash("error", "Email or password is incorrect");
             return res.redirect('/');
         }
+
+        // Update last login
+        await userModel.findOneAndUpdate(
+            { email: user.email },
+            { lastLogin: new Date() }
+        );
 
         const userToken = generateToken(user);
         res.cookie('userToken', userToken);

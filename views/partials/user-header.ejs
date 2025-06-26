@@ -17,67 +17,692 @@
     }
   </script>
   <style>
+    :root {
+      /* Light Mode Colors */
+      --primary-50: #eff6ff;
+      --primary-100: #dbeafe;
+      --primary-200: #bfdbfe;
+      --primary-300: #93c5fd;
+      --primary-400: #60a5fa;
+      --primary-500: #3b82f6;
+      --primary-600: #2563eb;
+      --primary-700: #1d4ed8;
+      --primary-800: #1e40af;
+      --primary-900: #1e3a8a;
+
+      --secondary-50: #f8fafc;
+      --secondary-100: #f1f5f9;
+      --secondary-200: #e2e8f0;
+      --secondary-300: #cbd5e1;
+      --secondary-400: #94a3b8;
+      --secondary-500: #64748b;
+      --secondary-600: #475569;
+      --secondary-700: #334155;
+      --secondary-800: #1e293b;
+      --secondary-900: #0f172a;
+
+      --success-50: #f0fdf4;
+      --success-100: #dcfce7;
+      --success-200: #bbf7d0;
+      --success-300: #86efac;
+      --success-400: #4ade80;
+      --success-500: #22c55e;
+      --success-600: #16a34a;
+      --success-700: #15803d;
+      --success-800: #166534;
+      --success-900: #14532d;
+
+      --error-50: #fef2f2;
+      --error-100: #fee2e2;
+      --error-200: #fecaca;
+      --error-300: #fca5a5;
+      --error-400: #f87171;
+      --error-500: #ef4444;
+      --error-600: #dc2626;
+      --error-700: #b91c1c;
+      --error-800: #991b1b;
+      --error-900: #7f1d1d;
+
+      --warning-50: #fffbeb;
+      --warning-100: #fef3c7;
+      --warning-200: #fde68a;
+      --warning-300: #fcd34d;
+      --warning-400: #fbbf24;
+      --warning-500: #f59e0b;
+      --warning-600: #d97706;
+      --warning-700: #b45309;
+      --warning-800: #92400e;
+      --warning-900: #78350f;
+
+      /* Light Mode Theme */
+      --bg-primary: var(--secondary-50);
+      --bg-secondary: #ffffff;
+      --bg-tertiary: var(--secondary-100);
+      --text-primary: var(--secondary-900);
+      --text-secondary: var(--secondary-700);
+      --text-tertiary: var(--secondary-500);
+      --border-primary: var(--secondary-200);
+      --border-secondary: var(--secondary-300);
+      --accent-primary: var(--primary-600);
+      --accent-secondary: var(--primary-500);
+      --accent-hover: var(--primary-700);
+    }
+
+    .dark {
+      /* Dark Mode Theme */
+      --bg-primary: #0a0f1c;
+      --bg-secondary: #1a1f2e;
+      --bg-tertiary: #252a3a;
+      --text-primary: #f8fafc;
+      --text-secondary: #e2e8f0;
+      --text-tertiary: #94a3b8;
+      --border-primary: #334155;
+      --border-secondary: #475569;
+      --accent-primary: var(--primary-500);
+      --accent-secondary: var(--primary-400);
+      --accent-hover: var(--primary-300);
+    }
+
     html {
-      transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+      transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    /* Smooth transitions for all elements during theme change */
+    * {
+      transition: background-color 0.3s ease-in-out,
+                  color 0.3s ease-in-out,
+                  border-color 0.3s ease-in-out,
+                  box-shadow 0.3s ease-in-out;
+    }
+
+    /* Preserve specific transitions for interactive elements */
+    button, a, input, select {
+      transition: all 0.3s ease-in-out;
+    }
+
+    /* Theme toggle button enhancement */
+    #theme-toggle {
+      transition: all 0.3s ease-in-out !important;
+    }
+
+    #theme-toggle:hover {
+      transform: scale(1.1) rotate(180deg) !important;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-tertiary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-secondary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-tertiary);
+    }
+
+    /* Premium UI Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% {
+        box-shadow: 0 0 5px var(--accent-primary)33;
+      }
+      50% {
+        box-shadow: 0 0 20px var(--accent-primary)66, 0 0 30px var(--accent-primary)33;
+      }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    @keyframes gradient-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes ripple {
+      0% {
+        transform: scale(0);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    /* Premium button effects */
+    .premium-button {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary), var(--accent-primary));
+      background-size: 200% 200%;
+      animation: gradient-shift 3s ease infinite;
+    }
+
+    .premium-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .premium-button:hover::before {
+      left: 100%;
+    }
+
+    /* Floating elements */
+    .float-animation {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    /* Glow effects */
+    .glow-effect {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    /* Shimmer text effect */
+    .shimmer-text {
+      background: linear-gradient(90deg, var(--text-primary) 25%, var(--accent-primary) 50%, var(--text-primary) 75%);
+      background-size: 200% 100%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 2s linear infinite;
+    }
+
+    /* Ripple effect */
+    .ripple-effect {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ripple-effect::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .ripple-effect:active::after {
+      width: 300px;
+      height: 300px;
+    }
+
+    /* Prevent flash of unstyled content */
+    .theme-loading {
+      transition: opacity 0.3s ease-in-out;
     }
   </style>
+
+  <!-- Immediate theme application script -->
+  <script>
+    // Apply saved theme immediately to prevent flash
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const shouldUseDark = savedTheme ? savedTheme === 'dark' : prefersDark;
+
+      if (shouldUseDark) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
 </head>
 
 <body
-  class="font-['Rubik'] bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-500 ease-in-out">
+  class="font-['Rubik'] transition-colors duration-300 ease-in-out theme-loading"
+  style="background-color: var(--bg-primary); color: var(--text-primary); opacity: 0;"
+  onload="document.body.style.opacity='1';"
 
   <!-- Navigation Bar -->
-  <nav
-    class="w-full fixed top-0 left-0 z-50 bg-white dark:bg-gray-800 shadow-md px-8 py-4 flex items-center justify-between transition-colors duration-500 ease-in-out">
-    <!-- Logo with link to home -->
-    <a href="#" class="text-2xl font-bold text-blue-500 tracking-wide hover:text-blue-600 transition">Velora</a>
-
-
-
+  <nav id="navbar"
+    class="w-full fixed top-0 left-0 z-50 px-8 py-4 flex items-center justify-between transition-all duration-300 ease-in-out backdrop-blur-lg"
+    style="background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-primary); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);"
+    <!-- Clean Logo without shimmer animation -->
     <% var loggedIn=typeof loggedIn !=='undefined' ? loggedIn : true %>
-    <%  if(loggedIn){ %>
-      <!-- Right side -->
-      <div
-        class="flex items-center gap-6 text-xl text-gray-700 dark:text-gray-300 transition-colors duration-500 ease-in-out">
-        <!-- Home link -->
-        <a href="/shop" class="hover:text-blue-500 transition" title="Home">
-          <i class="ri-home-4-line"></i>
-        </a>
+    <a href="<%= loggedIn ? '/shop' : '#' %>"
+       class="text-2xl font-bold tracking-wide transition-all duration-300 transform hover:scale-105 relative group"
+       style="color: var(--accent-primary);">
+        <span class="relative z-10">Velora</span>
+        <div class="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+             style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));"></div>
+    </a>
 
-        <!-- Shopping Cart link -->
-        <a href="/cart" class="hover:text-blue-500 transition" title="Cart">
-          <i class="ri-shopping-cart-2-line"></i>
-        </a>
+    <!-- Search Bar (centered) - Only show when logged in -->
+    <% if(loggedIn){ %>
+      <div class="hidden md:flex flex-1 max-w-lg mx-8">
+        <div class="relative w-full">
+          <input
+            type="text"
+            id="headerSearch"
+            placeholder="Search products..."
+            class="w-full pl-10 pr-4 py-2 rounded-full text-sm transition-all duration-200 focus:outline-none focus:ring-2"
+            style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary); focus:ring-color: var(--accent-primary); focus:border-color: var(--accent-primary);"
+            onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 2px var(--accent-primary)33';"
+            onblur="this.style.borderColor='var(--border-primary)'; this.style.boxShadow='none';"
+          >
+          <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2" style="color: var(--text-tertiary);"></i>
+        </div>
+      </div>
+    <% } else { %>
+      <!-- Spacer for non-logged in users -->
+      <div class="flex-1"></div>
+    <% } %>
+    <!-- Right side - Always visible -->
+    <div class="flex items-center gap-4 text-xl transition-colors duration-300 ease-in-out" style="color: var(--text-secondary);">
+      <!-- Mobile Search Toggle - Only for logged in users -->
+      <% if(loggedIn){ %>
+        <button id="mobile-search-toggle"
+                class="md:hidden p-2 rounded-full transition-all duration-300 transform hover:scale-110 relative group"
+                title="Search"
+                style="color: var(--text-secondary);">
+          <i class="ri-search-line relative z-10"></i>
+          <div class="absolute inset-0 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+               style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));"></div>
+        </button>
+      <% } %>
 
-        <!-- User Account link -->
-        <a href="/account" class="hover:text-blue-500 transition" title="My Account">
-          <i class="ri-user-line"></i>
-        </a>
+      <!-- Home link - Always visible -->
+      <a href="/shop"
+         class="p-2 rounded-full transition-all duration-300 transform hover:scale-110 relative group"
+         title="Home"
+         style="color: var(--text-secondary);">
+        <i class="ri-home-4-line relative z-10"></i>
+        <div class="absolute inset-0 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+             style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));"></div>
+      </a>
+
+        <!-- Shopping Cart link with counter - Only for logged-in users -->
+        <% if (typeof loggedIn !== 'undefined' && loggedIn) { %>
+          <a href="/cart"
+             class="p-2 rounded-full transition-all duration-300 transform hover:scale-110 relative group"
+             title="Cart"
+             style="color: var(--text-secondary);">
+            <i class="ri-shopping-cart-2-line relative z-10"></i>
+            <!-- Cart Counter Badge -->
+            <span id="cart-counter"
+                  class="absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center transition-all duration-300 transform scale-0"
+                  style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: 2px solid var(--bg-secondary);">
+              0
+            </span>
+            <div class="absolute inset-0 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+                 style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));"></div>
+          </a>
+        <% } %>
+
+        <!-- User Account link / Login button -->
+        <% if (typeof loggedIn !== 'undefined' && loggedIn) { %>
+          <a href="/account"
+             class="p-2 rounded-full transition-all duration-300 transform hover:scale-110 relative group"
+             title="My Account"
+             style="color: var(--text-secondary);">
+            <i class="ri-user-line relative z-10"></i>
+            <div class="absolute inset-0 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+                 style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));"></div>
+          </a>
+        <% } else { %>
+          <a href="/"
+             class="p-2 rounded-full transition-all duration-300 transform hover:scale-110 relative group"
+             title="Login"
+             style="color: var(--text-secondary);">
+            <i class="ri-login-box-line relative z-10"></i>
+            <div class="absolute inset-0 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+                 style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));"></div>
+          </a>
+        <% } %>
+
+        <!-- Logout button (only for logged-in users) -->
+        <% if (typeof loggedIn !== 'undefined' && loggedIn) { %>
+          <a href="/logout"
+             class="p-2 rounded-full transition-all duration-300 transform hover:scale-110 relative group"
+             title="Logout"
+             style="color: var(--text-secondary);">
+            <i class="ri-logout-box-line relative z-10"></i>
+            <div class="absolute inset-0 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+                 style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));"></div>
+          </a>
+        <% } %>
 
         <!-- Theme toggle button -->
-        <button id="theme-toggle" class="text-2xl hover:text-blue-500 transition" title="Toggle Theme">
-          <i id="theme-icon" class="ri-moon-line"></i>
+        <button id="theme-toggle"
+                class="p-2 rounded-full transition-all duration-300 transform hover:scale-110 hover:rotate-180 relative group"
+                title="Toggle Theme"
+                style="color: var(--text-secondary);">
+          <i id="theme-icon" class="ri-moon-line relative z-10"></i>
+          <div class="absolute inset-0 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+               style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));"></div>
         </button>
-
-        <a href="/users/logout">
-          <h5 class="text-red-500 text-xl font-semibold">LogOut</h5>
-        </a>
       </div>
-
-    <%  } %>
 
   </nav>
 
+  <!-- Mobile Search Bar - Only show when logged in -->
+  <% if(loggedIn){ %>
+    <div id="mobile-search" class="fixed top-16 left-0 right-0 p-4 z-40 hidden md:hidden backdrop-blur-lg"
+         style="background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-primary); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+      <div class="relative">
+        <input
+          type="text"
+          id="mobileSearchInput"
+          placeholder="Search products..."
+          class="w-full pl-10 pr-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+          style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"
+          onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 2px var(--accent-primary)33';"
+          onblur="this.style.borderColor='var(--border-primary)'; this.style.boxShadow='none';"
+        >
+        <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2" style="color: var(--text-tertiary);"></i>
+      </div>
+    </div>
+  <% } %>
+
   <script>
+    // Enhanced Theme Toggle with Persistence
     const html = document.documentElement;
     const toggle = document.getElementById('theme-toggle');
     const icon = document.getElementById('theme-icon');
 
-    toggle.addEventListener('click', () => {
-      html.classList.toggle('dark');
-      icon.classList.toggle('ri-moon-line');
-      icon.classList.toggle('ri-sun-line');
+    // Function to apply theme
+    function applyTheme(isDark) {
+      if (isDark) {
+        html.classList.add('dark');
+        icon.classList.remove('ri-moon-line');
+        icon.classList.add('ri-sun-line');
+      } else {
+        html.classList.remove('dark');
+        icon.classList.remove('ri-sun-line');
+        icon.classList.add('ri-moon-line');
+      }
+    }
+
+    // Function to get saved theme or detect system preference
+    function getInitialTheme() {
+      // Check if user has a saved preference
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        return savedTheme === 'dark';
+      }
+
+      // Check system preference
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return true;
+      }
+
+      // Default to light mode
+      return false;
+    }
+
+    // Initialize theme on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const isDark = getInitialTheme();
+      applyTheme(isDark);
+
+      // Save initial theme if not already saved
+      if (!localStorage.getItem('theme')) {
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      }
+
+      // Remove loading class and show body
+      document.body.classList.remove('theme-loading');
+      document.body.style.opacity = '1';
     });
+
+    // Theme toggle click handler
+    if (toggle) {
+      toggle.addEventListener('click', () => {
+        const isDark = html.classList.contains('dark');
+        const newTheme = !isDark;
+
+        // Apply new theme
+        applyTheme(newTheme);
+
+        // Save preference to localStorage
+        localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+
+        // Add a nice animation effect
+        toggle.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+          toggle.style.transform = '';
+        }, 150);
+
+        // Show a subtle flash message for theme change
+        showThemeChangeMessage(newTheme ? 'Dark mode enabled' : 'Light mode enabled');
+      });
+    }
+
+    // Listen for system theme changes
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+        // Only auto-switch if user hasn't manually set a preference
+        const savedTheme = localStorage.getItem('theme');
+        if (!savedTheme) {
+          applyTheme(e.matches);
+        }
+      });
+    }
+
+    // Function to show theme change message
+    function showThemeChangeMessage(message) {
+      // Remove any existing theme message
+      const existingMessage = document.querySelector('.theme-change-message');
+      if (existingMessage) {
+        existingMessage.remove();
+      }
+
+      // Create new message
+      const messageEl = document.createElement('div');
+      messageEl.className = 'theme-change-message fixed top-20 right-4 p-3 rounded-lg shadow-lg z-50 transition-all duration-300';
+      messageEl.style.cssText = `
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+        transform: translateX(100%);
+        opacity: 0;
+      `;
+      messageEl.innerHTML = `
+        <div class="flex items-center">
+          <i class="ri-palette-line mr-2"></i>
+          ${message}
+        </div>
+      `;
+
+      document.body.appendChild(messageEl);
+
+      // Animate in
+      setTimeout(() => {
+        messageEl.style.transform = 'translateX(0)';
+        messageEl.style.opacity = '1';
+      }, 50);
+
+      // Animate out and remove
+      setTimeout(() => {
+        messageEl.style.transform = 'translateX(100%)';
+        messageEl.style.opacity = '0';
+        setTimeout(() => {
+          if (messageEl.parentNode) {
+            messageEl.parentNode.removeChild(messageEl);
+          }
+        }, 300);
+      }, 2000);
+    }
+
+
+
+    // Header search functionality
+    function handleSearch(input) {
+      input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          const query = this.value.trim();
+          if (query) {
+            // Redirect to shop with search parameter
+            window.location.href = `/shop?search=${encodeURIComponent(query)}`;
+          }
+        }
+      });
+    }
+
+    const headerSearch = document.getElementById('headerSearch');
+    const mobileSearchInput = document.getElementById('mobileSearchInput');
+    const mobileSearchToggle = document.getElementById('mobile-search-toggle');
+    const mobileSearch = document.getElementById('mobile-search');
+
+    if (headerSearch) {
+      handleSearch(headerSearch);
+    }
+
+    if (mobileSearchInput) {
+      handleSearch(mobileSearchInput);
+    }
+
+    // Mobile search toggle
+    if (mobileSearchToggle && mobileSearch) {
+      mobileSearchToggle.addEventListener('click', function() {
+        mobileSearch.classList.toggle('hidden');
+        if (!mobileSearch.classList.contains('hidden')) {
+          mobileSearchInput.focus();
+        }
+      });
+
+      // Close mobile search when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!mobileSearch.contains(e.target) && !mobileSearchToggle.contains(e.target)) {
+          mobileSearch.classList.add('hidden');
+        }
+      });
+    }
+
+    // Static navbar - no scroll effects for better user experience
+    const navbar = document.getElementById('navbar');
+
+    // Keep navbar always visible and maintain consistent styling
+    if (navbar) {
+      navbar.style.transform = 'translateY(0)';
+      navbar.style.backdropFilter = 'blur(20px)';
+      navbar.style.webkitBackdropFilter = 'blur(20px)';
+      navbar.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
+    }
+
+    // Cart Counter Functionality - Only for logged-in users
+    async function updateCartCounter() {
+      // Only update cart counter if user is logged in and cart counter element exists
+      const counter = document.getElementById('cart-counter');
+      if (!counter) {
+        return; // Cart counter doesn't exist (user not logged in)
+      }
+
+      try {
+        const response = await fetch('/api/cart/count');
+        const data = await response.json();
+
+        if (data.success) {
+          counter.textContent = data.count;
+
+          if (data.count > 0) {
+            counter.style.transform = 'scale(1)';
+            counter.style.opacity = '1';
+
+            // Add bounce animation for new items
+            counter.style.animation = 'bounce 0.6s ease-in-out';
+            setTimeout(() => {
+              counter.style.animation = '';
+            }, 600);
+          } else {
+            counter.style.transform = 'scale(0)';
+            counter.style.opacity = '0';
+          }
+        }
+      } catch (error) {
+        console.error('Failed to update cart counter:', error);
+      }
+    }
+
+    // Update cart counter on page load - Only if logged in
+    document.addEventListener('DOMContentLoaded', function() {
+      // Only start cart counter functionality if user is logged in (cart counter element exists)
+      const counter = document.getElementById('cart-counter');
+      if (counter) {
+        updateCartCounter();
+        // Update counter every 30 seconds to keep it in sync
+        setInterval(updateCartCounter, 30000);
+      }
+    });
+
+    // Add CSS animation for bounce effect
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes bounce {
+        0%, 20%, 53%, 80%, 100% {
+          transform: scale(1) translateZ(0);
+        }
+        40%, 43% {
+          transform: scale(1.3) translateZ(0);
+        }
+        70% {
+          transform: scale(1.1) translateZ(0);
+        }
+        90% {
+          transform: scale(1.05) translateZ(0);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Add hover effects to navigation icons
+    document.addEventListener('DOMContentLoaded', function() {
+      const navIcons = document.querySelectorAll('a[title], button[title]');
+
+      navIcons.forEach(icon => {
+        icon.addEventListener('mouseenter', function() {
+          this.style.color = 'var(--accent-primary)';
+          const bgDiv = this.querySelector('div');
+          if (bgDiv) {
+            bgDiv.style.opacity = '0.2';
+          }
+        });
+
+        icon.addEventListener('mouseleave', function() {
+          this.style.color = 'var(--text-secondary)';
+          const bgDiv = this.querySelector('div');
+          if (bgDiv) {
+            bgDiv.style.opacity = '0';
+          }
+        });
+      });
+    });
+
+    // Global function to update cart counter (can be called from other pages)
+    window.updateCartCounter = updateCartCounter;
   </script>
 
 </body>

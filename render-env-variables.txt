@@ -1,0 +1,15 @@
+# Environment Variables for Render Deployment
+# Copy these to your Render service environment variables
+
+MONGODB_URI=mongodb+srv://sameerkushwaha2003:FMtyttbrxz5wHMpS@cluster0.dn6pzce.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0
+PORT=5000
+JWT_KEY=asfdasfaskfjhhjknsjisdnjsdn
+EXPRESS_SESSION_SECRET=supersecretkey123
+NODE_ENV=production
+
+# Instructions:
+# 1. Go to your Render service dashboard
+# 2. Click on "Environment" tab
+# 3. Add each variable above as Key-Value pairs
+# 4. Click "Save Changes"
+# 5. Redeploy your service

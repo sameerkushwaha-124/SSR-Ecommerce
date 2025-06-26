@@ -31,7 +31,13 @@ const productsSchema = new mongoose.Schema({
     },
     description:{
         type:String
+    },
+    category:{
+        type:String,
+        default:"other"
     }
+}, {
+    timestamps: true // This adds createdAt and updatedAt fields
 })
 
 module.exports = mongoose.model('product',productsSchema);

@@ -13,11 +13,31 @@ module.exports.isLoggedInUser = async function(req, res, next) {
         if (!decoded || !decoded.email) {
             throw new Error("Invalid token");
         }
-        const user = await userModel.findOne({ email: decoded.email }).select("-password");
+
+        // Add timeout to database query
+        const user = await Promise.race([
+            userModel.findOne({ email: decoded.email }).select("-password"),
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Database query timeout')), 8000)
+            )
+        ]);
+
+        if (!user) {
+            throw new Error("User not found");
+        }
+
         req.user = user;
         next();
     } catch (err) {
-        req.flash("error", "Authentication failed. Please login again.");
+        // Clear the token if there's an authentication error
+        res.clearCookie("userToken");
+
+        if (err.message.includes('timeout') || err.message.includes('buffering')) {
+            req.flash("error", "Connection issue. Please try again.");
+        } else {
+            req.flash("error", "Authentication failed. Please login again.");
+        }
+
         if (process.env.NODE_ENV !== "production") {
             console.error("Error in isLoggedInUser:", err.message);
         }
@@ -36,11 +56,31 @@ module.exports.isLoggedInAdmin = async function(req, res, next) {
         if (!decoded || !decoded.email) {
             throw new Error("Invalid token");
         }
-        const owner = await ownerModel.findOne({ email: decoded.email }).select("-password");
+
+        // Add timeout to database query
+        const owner = await Promise.race([
+            ownerModel.findOne({ email: decoded.email }).select("-password"),
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Database query timeout')), 8000)
+            )
+        ]);
+
+        if (!owner) {
+            throw new Error("Owner not found");
+        }
+
         req.owner = owner;
         next();
     } catch (err) {
-        req.flash("error", "Authentication failed. Please login again.");
+        // Clear the token if there's an authentication error
+        res.clearCookie("ownerToken");
+
+        if (err.message.includes('timeout') || err.message.includes('buffering')) {
+            req.flash("error", "Connection issue. Please try again.");
+        } else {
+            req.flash("error", "Authentication failed. Please login again.");
+        }
+
         if (process.env.NODE_ENV !== "production") {
             console.error("Error in isLoggedInAdmin:", err.message);
         }

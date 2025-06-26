@@ -1,0 +1,468 @@
+<%- include('./partials/user-header') %>
+
+<style>
+    .product-detail-container {
+        margin-top: 80px;
+        height: calc(100vh - 80px);
+        overflow: hidden;
+    }
+
+    .product-image-main {
+        max-height: 350px;
+        max-width: 100%;
+        object-fit: contain;
+        border: 2px solid var(--border-primary);
+        border-radius: 12px;
+        padding: 8px;
+    }
+
+    .image-section {
+        position: sticky;
+        top: 0;
+        height: calc(100vh - 80px);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .details-section {
+        height: calc(100vh - 80px);
+        overflow-y: auto;
+        padding-right: 8px;
+    }
+
+    /* Custom scrollbar for details section */
+    .details-section::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .details-section::-webkit-scrollbar-track {
+        background: var(--bg-tertiary);
+        border-radius: 3px;
+    }
+
+    .details-section::-webkit-scrollbar-thumb {
+        background: var(--border-secondary);
+        border-radius: 3px;
+    }
+
+    .details-section::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-primary);
+    }
+
+    .color-option {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .color-option.selected {
+        border-color: var(--accent-primary);
+        transform: scale(1.1);
+    }
+
+    .size-option {
+        padding: 8px 16px;
+        border: 2px solid var(--border-primary);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+
+    .size-option.selected {
+        border-color: var(--accent-primary);
+        background-color: var(--accent-primary);
+        color: white;
+    }
+
+    .size-option:hover {
+        border-color: var(--accent-primary);
+    }
+
+    .quantity-input {
+        width: 80px;
+        text-align: center;
+        border: 2px solid var(--border-primary);
+        border-radius: 8px;
+        padding: 8px;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        color: white;
+        border: 1px solid var(--accent-primary);
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .btn-secondary {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-primary);
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+        border-color: var(--accent-primary);
+        color: var(--accent-primary);
+    }
+</style>
+
+<div class="product-detail-container" style="background-color: var(--bg-primary);">
+    <div class="h-full flex flex-col">
+        <!-- Breadcrumb -->
+        <div class="px-4 sm:px-6 lg:px-8 py-4 flex-shrink-0">
+            <nav>
+                <ol class="flex items-center space-x-2 text-sm">
+                    <li><a href="/shop" class="hover:text-accent-primary" style="color: var(--text-secondary);">Shop</a></li>
+                    <li style="color: var(--text-tertiary);">/</li>
+                    <li style="color: var(--text-primary);"><%= product.category || 'Product' %></li>
+                    <li style="color: var(--text-tertiary);">/</li>
+                    <li style="color: var(--accent-primary);"><%= product.name %></li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 px-4 sm:px-6 lg:px-8">
+
+        <div class="flex h-full">
+            <!-- Static Left Side - Product Image -->
+            <div class="w-1/2 image-section">
+                <div class="flex items-center justify-center">
+                    <% if (product.image) { %>
+                        <img src="data:image/jpeg;base64,<%= product.image.toString('base64') %>"
+                             alt="<%= product.name %>"
+                             class="product-image-main">
+                    <% } else { %>
+                        <div class="text-center border-2 border-dashed rounded-lg p-8" style="border-color: var(--border-primary); color: var(--text-tertiary);">
+                            <i class="ri-image-line text-4xl mb-2"></i>
+                            <p class="text-sm">No Image Available</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Scrollable Right Side - Product Details -->
+            <div class="w-1/2 details-section">
+                <div class="px-8 py-6 space-y-6">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2" style="color: var(--text-primary);">
+                        <%= product.name %>
+                    </h1>
+                    <p class="text-lg" style="color: var(--text-secondary);">
+                        <%= product.category || 'General' %>
+                    </p>
+                </div>
+
+                <!-- Price -->
+                <div class="flex items-center space-x-4">
+                    <span class="text-3xl font-bold" style="color: var(--accent-primary);">
+                        ₹<%= (product.price - (product.price * (product.discount/100))).toFixed(0) %>
+                    </span>
+                    <% if (product.discount > 0) { %>
+                        <span class="text-xl line-through" style="color: var(--text-tertiary);">
+                            ₹<%= product.price.toFixed(0) %>
+                        </span>
+                        <span class="px-3 py-1 rounded-full text-sm font-bold text-white"
+                              style="background: linear-gradient(135deg, var(--error-500), var(--error-600));">
+                            <%= product.discount %>% OFF
+                        </span>
+                    <% } %>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-3" style="color: var(--text-primary);">Description</h3>
+                    <p style="color: var(--text-secondary); line-height: 1.6;">
+                        <%= product.description || 'No description available for this product.' %>
+                    </p>
+                </div>
+
+                <!-- Color Selection (for watches and electronics) -->
+                <% if (product.category && (product.category.toLowerCase().includes('watch') || product.category.toLowerCase().includes('electronic'))) { %>
+                <div>
+                    <h3 class="text-lg font-semibold mb-3" style="color: var(--text-primary);">Color</h3>
+                    <div class="flex space-x-3" id="color-options">
+                        <div class="color-option selected" style="background-color: #000000;" data-color="Black" title="Black"></div>
+                        <div class="color-option" style="background-color: #ffffff; border: 1px solid #ddd;" data-color="White" title="White"></div>
+                        <div class="color-option" style="background-color: #c0c0c0;" data-color="Silver" title="Silver"></div>
+                        <div class="color-option" style="background-color: #ffd700;" data-color="Gold" title="Gold"></div>
+                        <div class="color-option" style="background-color: #0066cc;" data-color="Blue" title="Blue"></div>
+                    </div>
+                    <p class="mt-2 text-sm" style="color: var(--text-tertiary);">
+                        Selected: <span id="selected-color">Black</span>
+                    </p>
+                </div>
+                <% } %>
+
+                <!-- Size Selection (for clothing) -->
+                <% if (product.category && (product.category.toLowerCase().includes('shirt') || product.category.toLowerCase().includes('cloth') || product.category.toLowerCase().includes('apparel') || product.category.toLowerCase().includes('fashion'))) { %>
+                <div>
+                    <h3 class="text-lg font-semibold mb-3" style="color: var(--text-primary);">Size</h3>
+                    <div class="flex space-x-3" id="size-options">
+                        <div class="size-option" data-size="XS">XS</div>
+                        <div class="size-option selected" data-size="S">S</div>
+                        <div class="size-option" data-size="M">M</div>
+                        <div class="size-option" data-size="L">L</div>
+                        <div class="size-option" data-size="XL">XL</div>
+                        <div class="size-option" data-size="XXL">XXL</div>
+                    </div>
+                    <p class="mt-2 text-sm" style="color: var(--text-tertiary);">
+                        Selected: <span id="selected-size">S</span>
+                    </p>
+                </div>
+                <% } %>
+
+                <!-- Quantity -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-3" style="color: var(--text-primary);">Quantity</h3>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="decreaseQuantity()" class="w-10 h-10 rounded-full flex items-center justify-center" 
+                                style="background-color: var(--bg-secondary); border: 2px solid var(--border-primary); color: var(--text-primary);">
+                            <i class="ri-subtract-line"></i>
+                        </button>
+                        <input type="number" id="quantity" value="1" min="1" max="10" class="quantity-input">
+                        <button onclick="increaseQuantity()" class="w-10 h-10 rounded-full flex items-center justify-center"
+                                style="background-color: var(--bg-secondary); border: 2px solid var(--border-primary); color: var(--text-primary);">
+                            <i class="ri-add-line"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex space-x-4 pt-6">
+                    <% if (typeof loggedIn !== 'undefined' && loggedIn) { %>
+                        <button onclick="addToCart()" class="btn-primary flex-1 flex items-center justify-center space-x-2">
+                            <i class="ri-shopping-cart-line"></i>
+                            <span>Add to Cart</span>
+                        </button>
+                        <button onclick="buyNow()" class="btn-secondary flex items-center justify-center space-x-2">
+                            <i class="ri-flashlight-line"></i>
+                            <span>Buy Now</span>
+                        </button>
+                    <% } else { %>
+                        <button onclick="showLoginPrompt('add to cart')" class="btn-primary flex-1 flex items-center justify-center space-x-2">
+                            <i class="ri-shopping-cart-line"></i>
+                            <span>Add to Cart</span>
+                        </button>
+                        <button onclick="showLoginPrompt('buy this product')" class="btn-secondary flex items-center justify-center space-x-2">
+                            <i class="ri-flashlight-line"></i>
+                            <span>Buy Now</span>
+                        </button>
+                    <% } %>
+                </div>
+
+                    <!-- Back to Shop -->
+                    <div class="pt-4">
+                        <a href="/shop" class="inline-flex items-center space-x-2 text-sm hover:underline"
+                           style="color: var(--text-secondary);">
+                            <i class="ri-arrow-left-line"></i>
+                            <span>Back to Shop</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Color selection
+    document.querySelectorAll('.color-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            document.getElementById('selected-color').textContent = this.dataset.color;
+        });
+    });
+
+    // Size selection
+    document.querySelectorAll('.size-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.size-option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            document.getElementById('selected-size').textContent = this.dataset.size;
+        });
+    });
+
+    // Quantity controls
+    function increaseQuantity() {
+        const input = document.getElementById('quantity');
+        const currentValue = parseInt(input.value);
+        if (currentValue < 10) {
+            input.value = currentValue + 1;
+        }
+    }
+
+    function decreaseQuantity() {
+        const input = document.getElementById('quantity');
+        const currentValue = parseInt(input.value);
+        if (currentValue > 1) {
+            input.value = currentValue - 1;
+        }
+    }
+
+    // Show login prompt function
+    function showLoginPrompt(action) {
+        showFlashMessage('info', `Please login to ${action}. Click the login button in the top navigation.`);
+    }
+
+    // Add to cart functionality
+    async function addToCart() {
+        const quantity = document.getElementById('quantity').value;
+        const selectedColor = document.getElementById('selected-color')?.textContent || null;
+        const selectedSize = document.getElementById('selected-size')?.textContent || null;
+        
+        try {
+            const button = event.target.closest('button');
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Adding...';
+            button.disabled = true;
+
+            const response = await fetch(`/addtocart/<%= product._id %>`, {
+                method: 'GET'
+            });
+
+            if (response.ok) {
+                // Update cart counter
+                if (window.updateCartCounter) {
+                    window.updateCartCounter();
+                }
+
+                button.innerHTML = '<i class="ri-check-line"></i> Added!';
+                setTimeout(() => {
+                    button.innerHTML = originalContent;
+                    button.disabled = false;
+                }, 2000);
+
+                showFlashMessage('success', `${quantity} item(s) added to cart!`);
+            } else {
+                throw new Error('Failed to add item to cart');
+            }
+        } catch (error) {
+            console.error('Add to cart error:', error);
+            showFlashMessage('error', 'Failed to add item to cart');
+            
+            const button = event.target.closest('button');
+            button.innerHTML = '<i class="ri-shopping-cart-line"></i> <span>Add to Cart</span>';
+            button.disabled = false;
+        }
+    }
+
+    // Buy now functionality - Direct to checkout
+    async function buyNow() {
+        const button = document.querySelector('button[onclick="buyNow()"]');
+        const originalContent = button.innerHTML;
+
+        // Show loading state
+        button.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> <span>Processing...</span>';
+        button.disabled = true;
+
+        try {
+            const selectedColor = document.querySelector('input[name="color"]:checked')?.value;
+            const selectedSize = document.querySelector('input[name="size"]:checked')?.value;
+            const quantity = document.getElementById('quantity')?.value || 1;
+
+            const response = await fetch('/buy-now', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    productId: '<%= product._id %>',
+                    selectedColor: selectedColor,
+                    selectedSize: selectedSize,
+                    quantity: quantity
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showFlashMessage('success', data.message);
+                setTimeout(() => {
+                    window.location.href = data.redirectUrl;
+                }, 1000);
+            } else {
+                showFlashMessage('error', data.message || 'Failed to process buy now request');
+                button.innerHTML = originalContent;
+                button.disabled = false;
+            }
+        } catch (error) {
+            console.error('Buy now error:', error);
+            showFlashMessage('error', 'Failed to process buy now request');
+            button.innerHTML = originalContent;
+            button.disabled = false;
+        }
+    }
+
+    // Flash message function
+    function showFlashMessage(type, message) {
+        const flashMessage = document.createElement('div');
+        flashMessage.className = `flash-message fixed top-20 left-1/2 transform -translate-x-1/2 p-4 pr-12 rounded-xl z-50 shadow-2xl min-w-80 max-w-md backdrop-blur-lg`;
+
+        let bgStyle, iconClass;
+        if (type === 'success') {
+            bgStyle = 'background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);';
+            iconClass = 'ri-check-circle-line';
+        } else if (type === 'info') {
+            bgStyle = 'background: linear-gradient(135deg, #3b82f6, #2563eb); border: 1px solid #60a5fa; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);';
+            iconClass = 'ri-information-line';
+        } else {
+            bgStyle = 'background: linear-gradient(135deg, #ef4444, #dc2626); border: 1px solid #f87171; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);';
+            iconClass = 'ri-error-warning-line';
+        }
+
+        flashMessage.style.cssText = bgStyle;
+        flashMessage.innerHTML = `
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="${iconClass} text-white text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <span class="block text-white font-medium">${message}</span>
+                </div>
+            </div>
+            <button class="absolute top-2 right-3 text-white hover:text-gray-200 text-xl font-bold transition-colors duration-200" onclick="this.parentElement.remove()">&times;</button>
+        `;
+
+        document.body.appendChild(flashMessage);
+
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            if (flashMessage.parentNode) {
+                flashMessage.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                flashMessage.style.transform = 'translateX(-50%) translateY(-20px)';
+                flashMessage.style.opacity = '0';
+                setTimeout(() => {
+                    if (flashMessage.parentNode) {
+                        flashMessage.parentNode.removeChild(flashMessage);
+                    }
+                }, 400);
+            }
+        }, 3000);
+    }
+</script>
+
+<%- include('./partials/footer') %>

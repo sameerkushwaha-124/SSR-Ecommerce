@@ -4,33 +4,351 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Velora</title>
+  <title>Velora - Owner Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
     rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  
+
+  <style>
+    :root {
+      /* Light Mode Colors */
+      --primary-50: #eff6ff;
+      --primary-100: #dbeafe;
+      --primary-200: #bfdbfe;
+      --primary-300: #93c5fd;
+      --primary-400: #60a5fa;
+      --primary-500: #3b82f6;
+      --primary-600: #2563eb;
+      --primary-700: #1d4ed8;
+      --primary-800: #1e40af;
+      --primary-900: #1e3a8a;
+
+      --secondary-50: #f8fafc;
+      --secondary-100: #f1f5f9;
+      --secondary-200: #e2e8f0;
+      --secondary-300: #cbd5e1;
+      --secondary-400: #94a3b8;
+      --secondary-500: #64748b;
+      --secondary-600: #475569;
+      --secondary-700: #334155;
+      --secondary-800: #1e293b;
+      --secondary-900: #0f172a;
+
+      --success-500: #22c55e;
+      --success-600: #16a34a;
+      --error-500: #ef4444;
+      --error-600: #dc2626;
+      --warning-400: #fbbf24;
+
+      /* Light Mode Theme */
+      --bg-primary: var(--secondary-50);
+      --bg-secondary: #ffffff;
+      --bg-tertiary: var(--secondary-100);
+      --text-primary: var(--secondary-900);
+      --text-secondary: var(--secondary-700);
+      --text-tertiary: var(--secondary-500);
+      --border-primary: var(--secondary-200);
+      --border-secondary: var(--secondary-300);
+      --accent-primary: var(--primary-600);
+      --accent-secondary: var(--primary-500);
+      --accent-hover: var(--primary-700);
+    }
+
+    .dark {
+      /* Dark Mode Theme */
+      --bg-primary: #0a0f1c;
+      --bg-secondary: #1a1f2e;
+      --bg-tertiary: #252a3a;
+      --text-primary: #f8fafc;
+      --text-secondary: #e2e8f0;
+      --text-tertiary: #94a3b8;
+      --border-primary: #334155;
+      --border-secondary: #475569;
+      --accent-primary: var(--primary-500);
+      --accent-secondary: var(--primary-400);
+      --accent-hover: var(--primary-300);
+    }
+
+    html {
+      transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    /* Smooth transitions for all elements during theme change */
+    * {
+      transition: background-color 0.3s ease-in-out,
+                  color 0.3s ease-in-out,
+                  border-color 0.3s ease-in-out,
+                  box-shadow 0.3s ease-in-out;
+    }
+
+    /* Preserve specific transitions for interactive elements */
+    button, a, input, select {
+      transition: all 0.3s ease-in-out;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-tertiary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-secondary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-tertiary);
+    }
+  </style>
+
+  <!-- Immediate theme application script -->
+  <script>
+    // Apply saved theme immediately to prevent flash
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const shouldUseDark = savedTheme ? savedTheme === 'dark' : prefersDark;
+
+      if (shouldUseDark) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
 </head>
 
-<body>
+<body class="font-['Rubik'] transition-colors duration-300 ease-in-out theme-loading"
+      style="background-color: var(--bg-primary); color: var(--text-primary); opacity: 0;"
+      onload="document.body.style.opacity='1';">
 
-  <nav
-    class="w-full fixed top-0 left-0 z-50 bg-white shadow-md px-8 py-4 flex items-center justify-between transition-colors duration-500 ease-in-out">
-    <!-- Logo with link to home -->
-    <a href="#" class="text-2xl font-bold text-blue-500 tracking-wide hover:text-blue-600 transition">Velora</a>
-    <% var loggedIn=typeof loggedIn !=='undefined' ? loggedIn : true %>
-    <%  if(loggedIn){ %>
-        <a href="/owners/logout">
-          <h5 class="text-red-500 text-xl font-semibold">LogOut</h5>
+  <!-- Enhanced Navigation Bar -->
+  <nav id="navbar"
+    class="w-full fixed top-0 left-0 z-50 px-8 py-4 flex items-center justify-between transition-all duration-300 ease-in-out backdrop-blur-lg"
+    style="background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-primary); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+
+    <!-- Logo with link to dashboard -->
+    <a href="/owners/dashboard"
+       class="text-2xl font-bold tracking-wide transition-all duration-300 transform hover:scale-105 relative group"
+       style="color: var(--accent-primary);">
+        <span class="relative z-10">Velora</span>
+        <span class="text-sm font-normal ml-2" style="color: var(--text-tertiary);">Owner</span>
+        <div class="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+             style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));"></div>
+    </a>
+
+    <!-- Navigation Links -->
+    <div class="hidden md:flex items-center space-x-6">
+      <a href="/owners/dashboard"
+         class="px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 transform"
+         style="color: var(--text-secondary);"
+         onmouseover="this.style.backgroundColor='var(--bg-tertiary)'; this.style.color='var(--accent-primary)';"
+         onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-secondary)';">
+        <i class="ri-dashboard-line mr-2"></i>Dashboard
+      </a>
+      <a href="/owners/products"
+         class="px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 transform"
+         style="color: var(--text-secondary);"
+         onmouseover="this.style.backgroundColor='var(--bg-tertiary)'; this.style.color='var(--accent-primary)';"
+         onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-secondary)';">
+        <i class="ri-product-hunt-line mr-2"></i>Products
+      </a>
+      <a href="/owners/create-products"
+         class="px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 transform"
+         style="color: var(--text-secondary);"
+         onmouseover="this.style.backgroundColor='var(--bg-tertiary)'; this.style.color='var(--accent-primary)';"
+         onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-secondary)';">
+        <i class="ri-add-box-line mr-2"></i>Add Product
+      </a>
+      <a href="/owners/orders"
+         class="px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 transform"
+         style="color: var(--text-secondary);"
+         onmouseover="this.style.backgroundColor='var(--bg-tertiary)'; this.style.color='var(--accent-primary)';"
+         onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-secondary)';">
+        <i class="ri-shopping-bag-line mr-2"></i>Orders
+      </a>
+      <a href="/owners/users"
+         class="px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 transform"
+         style="color: var(--text-secondary);"
+         onmouseover="this.style.backgroundColor='var(--bg-tertiary)'; this.style.color='var(--accent-primary)';"
+         onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-secondary)';">
+        <i class="ri-user-line mr-2"></i>Users
+      </a>
+      <a href="/owners/profile"
+         class="px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 transform"
+         style="color: var(--text-secondary);"
+         onmouseover="this.style.backgroundColor='var(--bg-tertiary)'; this.style.color='var(--accent-primary)';"
+         onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-secondary)';">
+        <i class="ri-user-settings-line mr-2"></i>Profile
+      </a>
+    </div>
+
+    <!-- Right side controls -->
+    <div class="flex items-center gap-4 text-xl" style="color: var(--text-secondary);">
+      <!-- Theme toggle button -->
+      <button id="theme-toggle"
+              class="p-2 rounded-full transition-all duration-300 transform hover:scale-110 hover:rotate-180 relative group"
+              title="Toggle Theme"
+              style="color: var(--text-secondary);">
+        <i id="theme-icon" class="ri-moon-line relative z-10"></i>
+        <div class="absolute inset-0 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+             style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));"></div>
+      </button>
+
+      <!-- Logout Button -->
+      <% var loggedIn=typeof loggedIn !=='undefined' ? loggedIn : true %>
+      <% if(loggedIn){ %>
+        <a href="/owners/logout"
+           class="px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 transform hover:scale-105 relative group overflow-hidden"
+           style="color: white; background: linear-gradient(135deg, var(--error-500), var(--error-600)); border: 1px solid var(--error-400);">
+          <span class="relative z-10">Logout</span>
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+               style="background: linear-gradient(135deg, var(--error-600), var(--error-700));"></div>
         </a>
-        <%  } %>
-      </div>
+      <% } %>
+    </div>
   </nav>
+
+  <script>
+    // Enhanced Theme Toggle with Persistence
+    const html = document.documentElement;
+    const toggle = document.getElementById('theme-toggle');
+    const icon = document.getElementById('theme-icon');
+
+    // Function to apply theme
+    function applyTheme(isDark) {
+      if (isDark) {
+        html.classList.add('dark');
+        icon.classList.remove('ri-moon-line');
+        icon.classList.add('ri-sun-line');
+      } else {
+        html.classList.remove('dark');
+        icon.classList.remove('ri-sun-line');
+        icon.classList.add('ri-moon-line');
+      }
+    }
+
+    // Function to get saved theme or detect system preference
+    function getInitialTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        return savedTheme === 'dark';
+      }
+
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return true;
+      }
+
+      return false;
+    }
+
+    // Initialize theme on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const isDark = getInitialTheme();
+      applyTheme(isDark);
+
+      if (!localStorage.getItem('theme')) {
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      }
+
+      document.body.classList.remove('theme-loading');
+      document.body.style.opacity = '1';
+    });
+
+    // Theme toggle click handler
+    if (toggle) {
+      toggle.addEventListener('click', () => {
+        const isDark = html.classList.contains('dark');
+        const newTheme = !isDark;
+
+        applyTheme(newTheme);
+        localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+
+        toggle.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+          toggle.style.transform = '';
+        }, 150);
+
+        showThemeChangeMessage(newTheme ? 'Dark mode enabled' : 'Light mode enabled');
+      });
+    }
+
+    // Listen for system theme changes
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+        const savedTheme = localStorage.getItem('theme');
+        if (!savedTheme) {
+          applyTheme(e.matches);
+        }
+      });
+    }
+
+    // Function to show theme change message
+    function showThemeChangeMessage(message) {
+      const existingMessage = document.querySelector('.theme-change-message');
+      if (existingMessage) {
+        existingMessage.remove();
+      }
+
+      const messageEl = document.createElement('div');
+      messageEl.className = 'theme-change-message fixed top-20 right-4 p-3 rounded-lg shadow-lg z-50 transition-all duration-300';
+      messageEl.style.cssText = `
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+        transform: translateX(100%);
+        opacity: 0;
+      `;
+      messageEl.innerHTML = `
+        <div class="flex items-center">
+          <i class="ri-palette-line mr-2"></i>
+          ${message}
+        </div>
+      `;
+
+      document.body.appendChild(messageEl);
+
+      setTimeout(() => {
+        messageEl.style.transform = 'translateX(0)';
+        messageEl.style.opacity = '1';
+      }, 50);
+
+      setTimeout(() => {
+        messageEl.style.transform = 'translateX(100%)';
+        messageEl.style.opacity = '0';
+        setTimeout(() => {
+          if (messageEl.parentNode) {
+            messageEl.parentNode.removeChild(messageEl);
+          }
+        }, 300);
+      }, 2000);
+    }
+
+    // Static navbar - no scroll effects for better dashboard experience
+    const navbar = document.getElementById('navbar');
+
+    // Keep navbar always visible and maintain consistent styling
+    if (navbar) {
+      navbar.style.transform = 'translateY(0)';
+      navbar.style.backdropFilter = 'blur(20px)';
+      navbar.style.webkitBackdropFilter = 'blur(20px)';
+      navbar.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
+    }
+  </script>
 </body>
 
 </html>
-
-!

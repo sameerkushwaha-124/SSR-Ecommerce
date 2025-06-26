@@ -1,0 +1,174 @@
+<%- include('./partials/owner-header') %>
+<%- include('./partials/flash-messages') %>
+
+<div class="min-h-screen pt-20 pb-10" style="background-color: var(--bg-primary);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Dashboard Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold" style="color: var(--text-primary);">Owner Dashboard</h1>
+            <p class="mt-2" style="color: var(--text-tertiary);">Manage your e-commerce store</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Products -->
+            <div class="rounded-xl shadow-sm p-6 backdrop-blur-sm" 
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 rounded-lg flex items-center justify-center"
+                             style="background: linear-gradient(135deg, var(--primary-500), var(--primary-600));">
+                            <i class="ri-product-hunt-line text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium" style="color: var(--text-tertiary);">Total Products</p>
+                        <p class="text-2xl font-bold" style="color: var(--text-primary);"><%= totalProducts %></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Users -->
+            <div class="rounded-xl shadow-sm p-6 backdrop-blur-sm" 
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 rounded-lg flex items-center justify-center"
+                             style="background: linear-gradient(135deg, var(--success-500), var(--success-600));">
+                            <i class="ri-user-line text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium" style="color: var(--text-tertiary);">Total Users</p>
+                        <p class="text-2xl font-bold" style="color: var(--text-primary);"><%= totalUsers %></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue (Placeholder) -->
+            <div class="rounded-xl shadow-sm p-6 backdrop-blur-sm" 
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 rounded-lg flex items-center justify-center"
+                             style="background: linear-gradient(135deg, var(--warning-400), #f59e0b);">
+                            <i class="ri-money-dollar-circle-line text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium" style="color: var(--text-tertiary);">Revenue</p>
+                        <p class="text-2xl font-bold" style="color: var(--text-primary);">₹0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders (Placeholder) -->
+            <div class="rounded-xl shadow-sm p-6 backdrop-blur-sm" 
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 rounded-lg flex items-center justify-center"
+                             style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                            <i class="ri-shopping-cart-line text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium" style="color: var(--text-tertiary);">Orders</p>
+                        <p class="text-2xl font-bold" style="color: var(--text-primary);">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Quick Actions Card -->
+            <div class="rounded-xl shadow-sm p-6 backdrop-blur-sm" 
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <h2 class="text-xl font-semibold mb-6" style="color: var(--text-primary);">Quick Actions</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <a href="/owners/create-products" 
+                       class="p-4 rounded-lg transition-all duration-300 transform hover:scale-105 text-center group"
+                       style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary);"
+                       onmouseover="this.style.backgroundColor='var(--accent-primary)'; this.style.color='white'; this.style.borderColor='var(--accent-primary)';"
+                       onmouseout="this.style.backgroundColor='var(--bg-tertiary)'; this.style.color='var(--text-primary)'; this.style.borderColor='var(--border-primary)';">
+                        <i class="ri-add-box-line text-2xl mb-2 block"></i>
+                        <span class="text-sm font-medium">Add Product</span>
+                    </a>
+                    <a href="/owners/products" 
+                       class="p-4 rounded-lg transition-all duration-300 transform hover:scale-105 text-center group"
+                       style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary);"
+                       onmouseover="this.style.backgroundColor='var(--accent-primary)'; this.style.color='white'; this.style.borderColor='var(--accent-primary)';"
+                       onmouseout="this.style.backgroundColor='var(--bg-tertiary)'; this.style.color='var(--text-primary)'; this.style.borderColor='var(--border-primary)';">
+                        <i class="ri-list-check text-2xl mb-2 block"></i>
+                        <span class="text-sm font-medium">Manage Products</span>
+                    </a>
+                    <a href="/owners/profile" 
+                       class="p-4 rounded-lg transition-all duration-300 transform hover:scale-105 text-center group"
+                       style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary);"
+                       onmouseover="this.style.backgroundColor='var(--accent-primary)'; this.style.color='white'; this.style.borderColor='var(--accent-primary)';"
+                       onmouseout="this.style.backgroundColor='var(--bg-tertiary)'; this.style.color='var(--text-primary)'; this.style.borderColor='var(--border-primary)';">
+                        <i class="ri-user-settings-line text-2xl mb-2 block"></i>
+                        <span class="text-sm font-medium">Profile Settings</span>
+                    </a>
+                    <a href="/shop" target="_blank"
+                       class="p-4 rounded-lg transition-all duration-300 transform hover:scale-105 text-center group"
+                       style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary);"
+                       onmouseover="this.style.backgroundColor='var(--accent-primary)'; this.style.color='white'; this.style.borderColor='var(--accent-primary)';"
+                       onmouseout="this.style.backgroundColor='var(--bg-tertiary)'; this.style.color='var(--text-primary)'; this.style.borderColor='var(--border-primary)';">
+                        <i class="ri-store-line text-2xl mb-2 block"></i>
+                        <span class="text-sm font-medium">View Shop</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Products -->
+            <div class="rounded-xl shadow-sm p-6 backdrop-blur-sm" 
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold" style="color: var(--text-primary);">Recent Products</h2>
+                    <a href="/owners/products" 
+                       class="text-sm font-medium transition-colors duration-200"
+                       style="color: var(--accent-primary);"
+                       onmouseover="this.style.color='var(--accent-hover)'" 
+                       onmouseout="this.style.color='var(--accent-primary)'">View All</a>
+                </div>
+                
+                <% if (recentProducts.length > 0) { %>
+                    <div class="space-y-3">
+                        <% recentProducts.forEach(function(product) { %>
+                            <div class="flex items-center p-3 rounded-lg transition-colors duration-200"
+                                 style="background-color: var(--bg-tertiary);">
+                                <div class="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center mr-3"
+                                     style="background-color: <%= product.bgcolor %>;">
+                                    <% if (product.image) { %>
+                                        <img src="data:image/jpeg;base64,<%= product.image.toString('base64') %>" 
+                                             alt="<%= product.name %>" class="w-full h-full object-contain">
+                                    <% } else { %>
+                                        <i class="ri-image-line text-gray-400"></i>
+                                    <% } %>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-medium text-sm" style="color: var(--text-primary);"><%= product.name %></h3>
+                                    <p class="text-xs" style="color: var(--text-tertiary);">₹<%= product.price %></p>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-8">
+                        <i class="ri-product-hunt-line text-4xl mb-4" style="color: var(--text-tertiary);"></i>
+                        <p style="color: var(--text-tertiary);">No products yet</p>
+                        <a href="/owners/create-products" 
+                           class="inline-block mt-4 px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105"
+                           style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white;">
+                            Create Your First Product
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('./partials/footer') %>

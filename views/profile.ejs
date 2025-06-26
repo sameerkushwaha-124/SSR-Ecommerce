@@ -1,0 +1,666 @@
+<%- include('./partials/user-header') %>
+<%- include('./partials/flash-messages') %>
+
+<div class="min-h-screen pt-20 pb-10" style="background-color: var(--bg-primary);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Profile Header -->
+        <div class="rounded-xl shadow-sm p-6 mb-6 backdrop-blur-sm"
+             style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+            <div class="flex items-center space-x-4">
+                <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <% if (user.picture) { %>
+                        <img src="<%= user.picture %>" alt="Profile" class="w-full h-full rounded-full object-cover">
+                    <% } else { %>
+                        <span class="text-2xl font-bold text-white"><%= user.fullname.charAt(0).toUpperCase() %></span>
+                    <% } %>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white"><%= user.fullname %></h1>
+                    <p class="text-gray-600 dark:text-gray-400"><%= user.email %></p>
+                    <p class="text-sm text-gray-500 dark:text-gray-500">Member since <%= new Date(user.createdAt).toLocaleDateString() %></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Static Search Bar -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6 sticky top-20 z-40">
+            <div class="flex flex-col sm:flex-row gap-4">
+                <div class="flex-1">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            placeholder="Search your orders, products..." 
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        >
+                        <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                <select id="searchType" class="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <option value="">All</option>
+                    <option value="orders">Orders</option>
+                    <option value="products">Products</option>
+                </select>
+                <button
+                    id="searchBtn"
+                    class="px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl relative overflow-hidden group"
+                    style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; border: 1px solid var(--accent-primary);"
+                >
+                    <span class="relative z-10 flex items-center gap-2">
+                        <i class="ri-search-line"></i>
+                        Search
+                    </span>
+                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                         style="background: linear-gradient(135deg, var(--accent-hover), var(--accent-primary));"></div>
+                </button>
+            </div>
+            
+            <!-- Search Results -->
+            <div id="searchResults" class="mt-4 hidden">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Search Results</h3>
+                <div id="resultsContainer" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6">
+            <div class="border-b border-gray-200 dark:border-gray-700">
+                <nav class="flex space-x-8 px-6">
+                    <button class="tab-btn py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 <%= activeTab === 'profile' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %>" data-tab="profile">
+                        <i class="ri-user-line mr-2"></i>Profile
+                    </button>
+                    <button class="tab-btn py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 <%= activeTab === 'orders' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %>" data-tab="orders">
+                        <i class="ri-shopping-bag-line mr-2"></i>Orders
+                    </button>
+                    <button class="tab-btn py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 <%= activeTab === 'security' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %>" data-tab="security">
+                        <i class="ri-shield-line mr-2"></i>Security
+                    </button>
+                    <button class="tab-btn py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 <%= activeTab === 'account' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %>" data-tab="account">
+                        <i class="ri-settings-line mr-2"></i>Account
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <!-- Profile Tab -->
+            <div id="profile-tab" class="tab-content <%= activeTab === 'profile' ? '' : 'hidden' %>">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Personal Information</h2>
+                <form action="/account/update" method="POST" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
+                            <input type="text" name="fullname" value="<%= user.fullname %>" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                            <input type="email" value="<%= user.email %>" disabled class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contact</label>
+                            <input type="text" name="contact" value="<%= user.contact || '' %>" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date of Birth</label>
+                            <input type="date" name="dateOfBirth" value="<%= user.dateOfBirth ? user.dateOfBirth.toISOString().split('T')[0] : '' %>" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Gender</label>
+                            <select name="gender" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                <option value="">Select Gender</option>
+                                <option value="male" <%= user.gender === 'male' ? 'selected' : '' %>>Male</option>
+                                <option value="female" <%= user.gender === 'female' ? 'selected' : '' %>>Female</option>
+                                <option value="other" <%= user.gender === 'other' ? 'selected' : '' %>>Other</option>
+                                <option value="prefer-not-to-say" <%= user.gender === 'prefer-not-to-say' ? 'selected' : '' %>>Prefer not to say</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Address Section -->
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Address</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Street Address</label>
+                                <input type="text" name="street" value="<%= user.address?.street || '' %>" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">City</label>
+                                <input type="text" name="city" value="<%= user.address?.city || '' %>" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">State</label>
+                                <input type="text" name="state" value="<%= user.address?.state || '' %>" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ZIP Code</label>
+                                <input type="text" name="zipCode" value="<%= user.address?.zipCode || '' %>" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Country</label>
+                                <input type="text" name="country" value="<%= user.address?.country || 'India' %>" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="submit" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200">
+                            Update Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Orders Tab -->
+            <div id="orders-tab" class="tab-content <%= activeTab === 'orders' ? '' : 'hidden' %>">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Order History</h2>
+                <div id="ordersContainer">
+                    <div class="text-center py-8">
+                        <i class="ri-loader-4-line animate-spin text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-500 dark:text-gray-400">Loading orders...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Tab -->
+            <div id="security-tab" class="tab-content <%= activeTab === 'security' ? '' : 'hidden' %>">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Change Password</h2>
+                <form action="/account/change-password" method="POST" class="space-y-6 max-w-md">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Current Password</label>
+                        <input type="password" name="currentPassword" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">New Password</label>
+                        <input type="password" name="newPassword" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Confirm New Password</label>
+                        <input type="password" name="confirmPassword" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                    <button type="submit" class="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200">
+                        Change Password
+                    </button>
+                </form>
+            </div>
+
+            <!-- Account Management Tab -->
+            <div id="account-tab" class="tab-content <%= activeTab === 'account' ? '' : 'hidden' %>">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Account Management</h2>
+
+                <!-- Account Status -->
+                <div class="mb-8 p-6 rounded-lg" style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary);">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold" style="color: var(--text-primary);">Account Status</h3>
+                            <p class="text-sm" style="color: var(--text-tertiary);">Manage your account visibility</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="px-3 py-1 rounded-full text-sm font-medium"
+                                  style="<%= user.isActive !== false ? 'background-color: #dcfce7; color: #166534;' : 'background-color: #fef2f2; color: #dc2626;' %>">
+                                <%= user.isActive !== false ? 'Active' : 'Inactive' %>
+                            </span>
+                            <% if (user.isActive !== false) { %>
+                                <button onclick="deactivateAccount()"
+                                        class="px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                                        style="background-color: #fbbf24; color: white;">
+                                    Deactivate
+                                </button>
+                            <% } else { %>
+                                <button onclick="activateAccount()"
+                                        class="px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                                        style="background-color: #10b981; color: white;">
+                                    Activate
+                                </button>
+                            <% } %>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm" style="color: var(--text-secondary);">
+                        <% if (user.isActive !== false) { %>
+                            <p><i class="ri-information-line mr-2"></i>Your account is currently active and visible to administrators.</p>
+                        <% } else { %>
+                            <p><i class="ri-error-warning-line mr-2"></i>Your account is currently inactive. You can still access your data but your account is marked as inactive.</p>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="p-6 rounded-lg border-2 border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800">
+                    <h3 class="text-lg font-semibold text-red-800 dark:text-red-400 mb-4">
+                        <i class="ri-error-warning-line mr-2"></i>Danger Zone
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-medium text-red-700 dark:text-red-300">Delete Account</h4>
+                            <p class="text-sm text-red-600 dark:text-red-400 mb-3">
+                                Once you delete your account, there is no going back. Please be certain.
+                            </p>
+                            <button onclick="showDeleteModal()"
+                                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200">
+                                <i class="ri-delete-bin-line mr-2"></i>Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div id="deleteAccountModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="rounded-xl p-6 max-w-md w-full mx-4 backdrop-blur-sm"
+         style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center mr-4"
+                 style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                <i class="ri-error-warning-line text-white text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold" style="color: var(--text-primary);">Delete Account</h3>
+                <p class="text-sm" style="color: var(--text-tertiary);">This action cannot be undone</p>
+            </div>
+        </div>
+        <p class="mb-4" style="color: var(--text-secondary);">
+            Are you sure you want to delete your account? This will permanently remove all your data.
+        </p>
+
+        <!-- Password Verification -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">
+                Enter your password to confirm:
+            </label>
+            <input type="password"
+                   id="deletePassword"
+                   placeholder="Your password"
+                   class="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                   style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"
+                   onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 2px var(--accent-primary)33';"
+                   onblur="this.style.borderColor='var(--border-primary)'; this.style.boxShadow='none';">
+            <div id="deletePasswordError" class="text-sm mt-2 hidden" style="color: #ef4444;">
+                Password is required to delete account
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-3">
+            <button onclick="closeDeleteModal()"
+                    class="px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                    style="background-color: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-primary);">
+                Cancel
+            </button>
+            <button id="confirmDeleteAccount"
+                    class="px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                    style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white;">
+                Delete Account
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tab functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetTab = this.getAttribute('data-tab');
+
+                // Remove active classes
+                tabBtns.forEach(b => {
+                    b.classList.remove('border-blue-500', 'text-blue-600');
+                    b.classList.add('border-transparent', 'text-gray-500');
+                });
+
+                tabContents.forEach(content => {
+                    content.classList.add('hidden');
+                });
+
+                // Add active classes
+                this.classList.remove('border-transparent', 'text-gray-500');
+                this.classList.add('border-blue-500', 'text-blue-600');
+
+                document.getElementById(targetTab + '-tab').classList.remove('hidden');
+
+                // Load orders if orders tab is clicked
+                if (targetTab === 'orders') {
+                    loadOrders();
+                }
+            });
+        });
+
+        // Load orders if orders tab is active by default
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('tab') === 'orders') {
+            loadOrders();
+        }
+
+        // Search functionality
+        const searchBtn = document.getElementById('searchBtn');
+        const searchInput = document.getElementById('searchInput');
+        const searchType = document.getElementById('searchType');
+        const searchResults = document.getElementById('searchResults');
+        const resultsContainer = document.getElementById('resultsContainer');
+
+        function performSearch() {
+            const query = searchInput.value.trim();
+            const type = searchType.value;
+
+            if (!query) {
+                searchResults.classList.add('hidden');
+                return;
+            }
+
+            // Show loading
+            resultsContainer.innerHTML = '<div class="text-center py-4"><i class="ri-loader-4-line animate-spin text-2xl text-blue-500"></i></div>';
+            searchResults.classList.remove('hidden');
+
+            // Perform search
+            fetch(`/account/search?query=${encodeURIComponent(query)}&type=${type}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayResults(data.results, data.query);
+                    } else {
+                        resultsContainer.innerHTML = '<div class="text-red-500 text-center py-4">Search failed. Please try again.</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    resultsContainer.innerHTML = '<div class="text-red-500 text-center py-4">Search failed. Please try again.</div>';
+                });
+        }
+
+        function displayResults(results, query) {
+            if (results.length === 0) {
+                resultsContainer.innerHTML = `<div class="text-gray-500 text-center py-4">No results found for "${query}"</div>`;
+                return;
+            }
+
+            let html = '';
+            results.forEach(result => {
+                if (result.name) {
+                    // Product result
+                    html += `
+                        <div class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div class="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center mr-3">
+                                <i class="ri-product-hunt-line text-gray-500"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900 dark:text-white">${result.name}</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">₹${result.price}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Order result
+                    html += `
+                        <div class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div class="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center mr-3">
+                                <i class="ri-shopping-bag-line text-gray-500"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900 dark:text-white">Order</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Total: ₹${result.total || '0.00'}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            resultsContainer.innerHTML = html;
+        }
+
+        searchBtn.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    });
+
+    // Account Management Functions
+    async function deactivateAccount() {
+        if (confirm('Are you sure you want to deactivate your account?')) {
+            try {
+                const response = await fetch('/account/deactivate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showFlashMessage('success', 'Account deactivated successfully');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showFlashMessage('error', data.message || 'Failed to deactivate account');
+                }
+            } catch (error) {
+                showFlashMessage('error', 'Failed to deactivate account');
+            }
+        }
+    }
+
+    async function activateAccount() {
+        try {
+            const response = await fetch('/account/activate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                showFlashMessage('success', 'Account activated successfully');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showFlashMessage('error', data.message || 'Failed to activate account');
+            }
+        } catch (error) {
+            showFlashMessage('error', 'Failed to activate account');
+        }
+    }
+
+    function showDeleteModal() {
+        document.getElementById('deleteAccountModal').classList.remove('hidden');
+        document.getElementById('deleteAccountModal').classList.add('flex');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteAccountModal').classList.add('hidden');
+        document.getElementById('deleteAccountModal').classList.remove('flex');
+        document.getElementById('deletePassword').value = '';
+        document.getElementById('deletePasswordError').classList.add('hidden');
+    }
+
+    document.getElementById('confirmDeleteAccount').addEventListener('click', async function() {
+        const password = document.getElementById('deletePassword').value;
+        const passwordError = document.getElementById('deletePasswordError');
+
+        if (!password) {
+            passwordError.textContent = 'Password is required to delete account';
+            passwordError.classList.remove('hidden');
+            return;
+        }
+
+        passwordError.classList.add('hidden');
+
+        try {
+            const response = await fetch('/account/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showFlashMessage('success', 'Account deleted successfully');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            } else {
+                passwordError.textContent = data.message || 'Failed to delete account';
+                passwordError.classList.remove('hidden');
+            }
+        } catch (error) {
+            passwordError.textContent = 'Failed to delete account';
+            passwordError.classList.remove('hidden');
+        }
+    });
+
+    function showFlashMessage(type, message) {
+        const flashMessage = document.createElement('div');
+        flashMessage.className = `flash-message fixed top-20 left-1/2 transform -translate-x-1/2 p-4 pr-12 rounded-xl z-50 shadow-2xl min-w-80 max-w-md backdrop-blur-lg`;
+
+        let bgStyle, iconClass;
+        if (type === 'success') {
+            bgStyle = 'background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);';
+            iconClass = 'ri-check-circle-line';
+        } else {
+            bgStyle = 'background: linear-gradient(135deg, #ef4444, #dc2626); border: 1px solid #f87171; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);';
+            iconClass = 'ri-error-warning-line';
+        }
+
+        flashMessage.style.cssText = bgStyle;
+        flashMessage.innerHTML = `
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="${iconClass} text-white text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <span class="block text-white font-medium">${message}</span>
+                </div>
+            </div>
+            <button class="absolute top-2 right-3 text-white hover:text-gray-200 text-xl font-bold transition-colors duration-200" onclick="this.parentElement.remove()">&times;</button>
+        `;
+
+        document.body.appendChild(flashMessage);
+
+        setTimeout(() => {
+            if (flashMessage.parentNode) {
+                flashMessage.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                flashMessage.style.transform = 'translateX(-50%) translateY(-20px)';
+                flashMessage.style.opacity = '0';
+                setTimeout(() => {
+                    if (flashMessage.parentNode) {
+                        flashMessage.parentNode.removeChild(flashMessage);
+                    }
+                }, 400);
+            }
+        }, 3000);
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('deleteAccountModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDeleteModal();
+        }
+    });
+
+    // Load Orders Function
+    async function loadOrders() {
+        const ordersContainer = document.getElementById('ordersContainer');
+
+        try {
+            const response = await fetch('/account/orders');
+            const data = await response.json();
+
+            if (data.success && data.orders.length > 0) {
+                let ordersHtml = '<div class="space-y-4">';
+
+                data.orders.forEach((order) => {
+
+                    const statusColors = {
+                        'pending': { bg: '#fef3c7', color: '#92400e' },
+                        'confirmed': { bg: '#dbeafe', color: '#1e40af' },
+                        'shipped': { bg: '#fed7aa', color: '#7c2d12' },
+                        'delivered': { bg: '#dcfce7', color: '#166534' },
+                        'cancelled': { bg: '#fef2f2', color: '#dc2626' }
+                    };
+
+                    const statusStyle = statusColors[order.orderStatus] || statusColors['pending'];
+
+                    ordersHtml += `
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 rounded-full overflow-hidden flex-shrink-0"
+                                         style="border: 2px solid var(--border-primary);">
+                                        ${order.product.imageUrl ?
+                                            `<img src="${order.product.imageUrl}"
+                                                 alt="${order.product.name}"
+                                                 class="w-full h-full object-cover">` :
+                                            `<div class="w-full h-full flex items-center justify-center"
+                                                 style="background-color: var(--bg-tertiary);">
+                                                <i class="ri-image-line text-gray-400"></i>
+                                             </div>`
+                                        }
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900 dark:text-white">${order.product.name}</h3>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                                            Order #${order.trackingNumber}
+                                        </p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                                            ${new Date(order.createdAt).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium"
+                                          style="background-color: ${statusStyle.bg}; color: ${statusStyle.color};">
+                                        ${order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
+                                    </span>
+                                    <div class="text-lg font-semibold text-gray-900 dark:text-white mt-2">
+                                        ₹${order.total.toLocaleString()}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <span class="font-medium">Quantity:</span> ${order.quantity}
+                                        ${order.selectedColor ? `<br><span class="font-medium">Color:</span> ${order.selectedColor}` : ''}
+                                        ${order.selectedSize ? `<br><span class="font-medium">Size:</span> ${order.selectedSize}` : ''}
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">Payment:</span> ${order.paymentMethod.toUpperCase()}
+                                        <br><span class="font-medium">Status:</span> ${order.paymentStatus}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                ordersHtml += '</div>';
+                ordersContainer.innerHTML = ordersHtml;
+            } else {
+                ordersContainer.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="ri-shopping-bag-line text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-500 dark:text-gray-400">No orders yet</p>
+                        <a href="/shop" class="inline-block mt-4 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200">
+                            Start Shopping
+                        </a>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Load orders error:', error);
+            ordersContainer.innerHTML = `
+                <div class="text-center py-8">
+                    <i class="ri-error-warning-line text-4xl text-red-400 mb-4"></i>
+                    <p class="text-red-500">Failed to load orders</p>
+                    <button onclick="loadOrders()" class="mt-4 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200">
+                        Try Again
+                    </button>
+                </div>
+            `;
+        }
+    }
+</script>
+
+<%- include('./partials/footer') %>

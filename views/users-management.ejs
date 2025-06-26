@@ -1,0 +1,356 @@
+<%- include('./partials/owner-header') %>
+<%- include('./partials/flash-messages') %>
+
+<div class="min-h-screen pt-20 pb-10" style="background-color: var(--bg-primary);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold" style="color: var(--text-primary);">Users Management</h1>
+                    <p class="mt-2" style="color: var(--text-tertiary);">Manage all registered users</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <%
+                        const activeUsers = users.filter(user => user.isActive !== false);
+                        const inactiveUsers = users.filter(user => user.isActive === false);
+                    %>
+                    <div class="px-4 py-2 rounded-lg" style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                        <span class="text-sm font-medium" style="color: var(--text-secondary);">Total Users: </span>
+                        <span class="text-lg font-bold" style="color: var(--accent-primary);"><%= users.length %></span>
+                    </div>
+                    <div class="px-4 py-2 rounded-lg" style="background-color: #dcfce7; border: 1px solid #34d399;">
+                        <span class="text-sm font-medium" style="color: #166534;">Active: </span>
+                        <span class="text-lg font-bold" style="color: #166534;"><%= activeUsers.length %></span>
+                    </div>
+                    <div class="px-4 py-2 rounded-lg" style="background-color: #fef2f2; border: 1px solid #f87171;">
+                        <span class="text-sm font-medium" style="color: #dc2626;">Inactive: </span>
+                        <span class="text-lg font-bold" style="color: #dc2626;"><%= inactiveUsers.length %></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Static Search and Filter Bar -->
+        <div class="mb-8 rounded-xl shadow-sm p-6 backdrop-blur-sm sticky top-24 z-10"
+             style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+            <div class="flex flex-col md:flex-row gap-4 items-center">
+                <form method="GET" action="/owners/users" class="flex flex-col md:flex-row gap-4 items-center w-full">
+                    <div class="flex-1">
+                        <input type="text" 
+                               name="search" 
+                               value="<%= searchQuery %>" 
+                               placeholder="Search users by name or email..." 
+                               class="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                               style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"
+                               onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 2px var(--accent-primary)33';"
+                               onblur="this.style.borderColor='var(--border-primary)'; this.style.boxShadow='none';">
+                    </div>
+                    
+                    <select name="sortby" 
+                            class="px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                            style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"
+                            onfocus="this.style.borderColor='var(--accent-primary)';"
+                            onblur="this.style.borderColor='var(--border-primary)';">
+                        <option value="newest" <%= currentSort === 'newest' ? 'selected' : '' %>>Newest First</option>
+                        <option value="oldest" <%= currentSort === 'oldest' ? 'selected' : '' %>>Oldest First</option>
+                        <option value="name" <%= currentSort === 'name' ? 'selected' : '' %>>Name A-Z</option>
+                        <option value="email" <%= currentSort === 'email' ? 'selected' : '' %>>Email A-Z</option>
+                    </select>
+                    
+                    <button type="submit" 
+                            class="px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105"
+                            style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white;">
+                        <i class="ri-search-line"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Users Content -->
+        <% if (users.length === 0) { %>
+            <div class="text-center py-16 rounded-xl shadow-sm backdrop-blur-sm"
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <i class="ri-user-line text-6xl mb-4" style="color: var(--text-tertiary);"></i>
+                <h3 class="text-xl font-semibold mb-2" style="color: var(--text-primary);">No Users Found</h3>
+                <% if (searchQuery) { %>
+                    <p class="mb-8" style="color: var(--text-tertiary);">No users match your search criteria.</p>
+                    <a href="/owners/users" 
+                       class="inline-block px-8 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105"
+                       style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white;">
+                        <i class="ri-refresh-line mr-2"></i>Show All Users
+                    </a>
+                <% } else { %>
+                    <p class="mb-8" style="color: var(--text-tertiary);">No users have registered yet.</p>
+                <% } %>
+            </div>
+        <% } else { %>
+            <!-- Users Table -->
+            <div class="rounded-xl shadow-sm backdrop-blur-sm overflow-hidden"
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead style="background-color: var(--bg-tertiary);">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-sm font-semibold" style="color: var(--text-primary);">User</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold" style="color: var(--text-primary);">Email</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold" style="color: var(--text-primary);">Joined</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold" style="color: var(--text-primary);">Status</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold" style="color: var(--text-primary);">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% users.forEach((user, index) => { %>
+                                <tr style="border-bottom: 1px solid var(--border-primary);" 
+                                    onmouseover="this.style.backgroundColor='var(--bg-tertiary)';" 
+                                    onmouseout="this.style.backgroundColor='transparent';">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 rounded-full flex items-center justify-center mr-3"
+                                                 style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));">
+                                                <span class="text-white font-semibold">
+                                                    <%= user.fullname ? user.fullname.charAt(0).toUpperCase() : 'U' %>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <div class="font-medium" style="color: var(--text-primary);">
+                                                    <%= user.fullname || 'Unknown User' %>
+                                                </div>
+                                                <div class="text-sm" style="color: var(--text-tertiary);">
+                                                    ID: <%= user._id.toString().slice(-8) %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div style="color: var(--text-secondary);"><%= user.email %></div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div style="color: var(--text-secondary);">
+                                            <%= new Date(user.createdAt || Date.now()).toLocaleDateString() %>
+                                        </div>
+                                        <div class="text-sm" style="color: var(--text-tertiary);">
+                                            <%= new Date(user.createdAt || Date.now()).toLocaleTimeString() %>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <% if (user.isActive !== false) { %>
+                                            <span class="px-3 py-1 rounded-full text-xs font-medium"
+                                                  style="background-color: #dcfce7; color: #166534;">
+                                                Active
+                                            </span>
+                                        <% } else { %>
+                                            <div>
+                                                <span class="px-3 py-1 rounded-full text-xs font-medium"
+                                                      style="background-color: #fef2f2; color: #dc2626;">
+                                                    Inactive
+                                                </span>
+                                                <% if (user.inactiveSince) { %>
+                                                    <div class="text-xs mt-1" style="color: var(--text-tertiary);">
+                                                        Since <%= new Date(user.inactiveSince).toLocaleDateString() %>
+                                                        <%
+                                                            const inactiveDate = new Date(user.inactiveSince);
+                                                            const now = new Date();
+                                                            const diffTime = Math.abs(now - inactiveDate);
+                                                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                                        %>
+                                                        <span class="text-xs" style="color: var(--text-tertiary);">
+                                                            (<%= diffDays === 1 ? '1 day' : diffDays + ' days' %> ago)
+                                                        </span>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                        <% } %>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center space-x-2">
+                                            <a href="/owners/users/<%= user._id %>"
+                                               class="p-2 rounded-lg transition-all duration-200 hover:scale-110"
+                                               style="background-color: var(--primary-100); color: var(--primary-600);"
+                                               title="View Profile">
+                                                <i class="ri-eye-line"></i>
+                                            </a>
+                                            <button onclick="deleteUser('<%= user._id %>', '<%= user.fullname %>')"
+                                                    class="p-2 rounded-lg transition-all duration-200 hover:scale-110"
+                                                    style="background-color: var(--error-100); color: var(--error-600);"
+                                                    title="Delete User">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="rounded-xl p-6 max-w-md w-full mx-4 backdrop-blur-sm"
+         style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+        <div class="flex items-center mb-4">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center mr-4"
+                 style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                <i class="ri-error-warning-line text-white text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold" style="color: var(--text-primary);">Delete User</h3>
+                <p class="text-sm" style="color: var(--text-tertiary);">This action cannot be undone</p>
+            </div>
+        </div>
+        <p class="mb-4" style="color: var(--text-secondary);">
+            Are you sure you want to delete user <span id="userName" class="font-semibold"></span>?
+        </p>
+
+        <!-- Password Verification -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">
+                Enter your admin password to confirm:
+            </label>
+            <input type="password"
+                   id="adminPassword"
+                   placeholder="Admin password"
+                   class="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                   style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"
+                   onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 2px var(--accent-primary)33';"
+                   onblur="this.style.borderColor='var(--border-primary)'; this.style.boxShadow='none';">
+            <div id="passwordError" class="text-sm mt-2 hidden" style="color: #ef4444;">
+                Password is required to delete users
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-3">
+            <button onclick="closeDeleteModal()"
+                    class="px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                    style="background-color: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-primary);">
+                Cancel
+            </button>
+            <button id="confirmDelete"
+                    class="px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                    style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white;">
+                Delete User
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let userToDelete = null;
+
+    function deleteUser(userId, userName) {
+        userToDelete = userId;
+        document.getElementById('userName').textContent = userName;
+        document.getElementById('deleteModal').classList.remove('hidden');
+        document.getElementById('deleteModal').classList.add('flex');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+        document.getElementById('deleteModal').classList.remove('flex');
+        document.getElementById('adminPassword').value = '';
+        document.getElementById('passwordError').classList.add('hidden');
+        userToDelete = null;
+    }
+
+    document.getElementById('confirmDelete').addEventListener('click', async function() {
+        if (!userToDelete) return;
+
+        const password = document.getElementById('adminPassword').value;
+        const passwordError = document.getElementById('passwordError');
+
+        // Validate password input
+        if (!password) {
+            passwordError.textContent = 'Password is required to delete users';
+            passwordError.classList.remove('hidden');
+            return;
+        }
+
+        // Hide any previous error
+        passwordError.classList.add('hidden');
+
+        try {
+            const response = await fetch(`/owners/users/delete/${userToDelete}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ password: password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showFlashMessage('success', 'User deleted successfully');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                passwordError.textContent = data.message || 'Failed to delete user';
+                passwordError.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Delete user error:', error);
+            passwordError.textContent = 'Failed to delete user';
+            passwordError.classList.remove('hidden');
+        }
+
+        if (document.getElementById('passwordError').classList.contains('hidden')) {
+            closeDeleteModal();
+        }
+    });
+
+    function showFlashMessage(type, message) {
+        const flashMessage = document.createElement('div');
+        flashMessage.className = `flash-message fixed top-20 left-1/2 transform -translate-x-1/2 p-4 pr-12 rounded-xl z-50 shadow-2xl min-w-80 max-w-md backdrop-blur-lg`;
+
+        let bgStyle, iconClass;
+        if (type === 'success') {
+            bgStyle = 'background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);';
+            iconClass = 'ri-check-circle-line';
+        } else {
+            bgStyle = 'background: linear-gradient(135deg, #ef4444, #dc2626); border: 1px solid #f87171; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);';
+            iconClass = 'ri-error-warning-line';
+        }
+
+        flashMessage.style.cssText = bgStyle;
+        flashMessage.innerHTML = `
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="${iconClass} text-white text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <span class="block text-white font-medium">${message}</span>
+                </div>
+            </div>
+            <button class="absolute top-2 right-3 text-white hover:text-gray-200 text-xl font-bold transition-colors duration-200" onclick="this.parentElement.remove()">&times;</button>
+        `;
+
+        document.body.appendChild(flashMessage);
+
+        setTimeout(() => {
+            if (flashMessage.parentNode) {
+                flashMessage.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                flashMessage.style.transform = 'translateX(-50%) translateY(-20px)';
+                flashMessage.style.opacity = '0';
+                setTimeout(() => {
+                    if (flashMessage.parentNode) {
+                        flashMessage.parentNode.removeChild(flashMessage);
+                    }
+                }, 400);
+            }
+        }, 3000);
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDeleteModal();
+        }
+    });
+</script>
+
+<%- include('./partials/footer') %>

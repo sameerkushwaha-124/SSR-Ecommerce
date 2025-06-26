@@ -1,72 +1,527 @@
-<%- include('./partials/user-header') %>   
-<div class="w-full min-h-screen flex flex-col lg:flex-row items-start px-4 sm:px-8 md:px-12 lg:px-8 py-10 gap-6 mt-16">
-    <!-- Slim Sidebar Filters -->
-    <div class="w-full lg:w-[15%] flex flex-col bg-gray-50 p-3 rounded-lg shadow-sm lg:sticky lg:top-28 h-fit">
-        <div class="flex items-center gap-2 mb-6">
-            <h3 class="text-gray-700 font-medium text-sm">Sort by</h3>
-            <form action="/shop" method="get" class="flex-1">
-                <select class="w-full text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500" name="sortby" onchange="this.form.submit()">
-                    <option value="popular">Popular</option>
-                    <option value="newest">Newest</option>
-                </select>
-            </form>
-        </div>
-        
-        <div class="flex flex-col space-y-2">
-            <h4 class="text-xl font-semibold text-gray-800 mb-1">Collections</h4>
-            <a class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 w-fit py-1" href="">New Collection</a>
-            <a class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 w-fit py-1" href="">All Products</a>
-            <a class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 w-fit py-1" href="">Discounted</a>
-        </div>
-        
-        <div class="flex flex-col mt-20 space-y-2">
-            <h4 class="text-xl font-semibold text-gray-800 mb-1">Filters</h4>
-            <a class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 w-fit py-1" href="">Availability</a>
-            <a class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 w-fit py-1" href="">Discount</a>
-            <a class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 w-fit py-1" href="">Price Range</a>
-            <a class="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 w-fit py-1" href="">Colors</a>
-        </div>
-    </div>
+<%- include('./partials/user-header') %>
+<%- include('./partials/flash-messages') %>
 
-    <!-- Product Grid - Now 4 columns -->
-    <div class="w-full lg:w-[80%]">
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            <% products.forEach(function(product){ %>
-                <div class="group relative overflow-hidden rounded-md shadow-sm hover:shadow-md transition-shadow duration-200">
-                    <!-- Product Image Container -->
-                    <div class="w-full aspect-square flex items-center justify-center bg-[<%= product.bgcolor %>]">
-                        <% if (product.image) { %>
-                            <img class="h-full w-full object-contain" src="data:image/jpeg;base64,<%= product.image.toString('base64') %>" alt="<%= product.name %>">
-                        <% } else { %>
-                            <div class="text-center text-xs text-gray-400">No Image</div>
-                        <% } %>
-                        <!-- Add to Cart Button (absolute positioned) -->
-                        <button class="absolute bottom-2 right-2 w-7 h-7 flex items-center justify-center rounded-full bg-white text-gray-800 hover:bg-blue-500 hover:text-white transition-all duration-200 shadow-md opacity-0 group-hover:opacity-100">
-                            <a href="/addtocart/<%= product._id %>">
-                                <i class="ri-shopping-cart-line text-sm"></i>
-                            </a>
-                           
-                        </button>
-                    </div>
-                    
-                    <!-- Product Info -->
-                    <div class="p-3 bg-[<%= product.panelcolor %>] text-[<%= product.textcolor %>]">
-                        <h3 class="font-medium text-sm truncate"><%= product.name %></h3>
-                        <div class="flex flex-wrap items-center mt-1 gap-1">
-                            <span class="font-bold text-sm">
-                                ₹<%= (product.price - (product.price * (product.discount/100))).toFixed(2) %>
-                            </span>
-                            <% if (product.discount > 0) { %>
-                                <span class="line-through text-gray-500 text-xs">₹<%= product.price.toFixed(2) %></span>
-                                <span class="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                                    <%= product.discount %>% off
-                                </span>
+<style>
+    /* Premium Shop Animations */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes productFloat {
+        0%, 100% { transform: translateY(0px) scale(1); }
+        50% { transform: translateY(-5px) scale(1.02); }
+    }
+
+    @keyframes shimmerProduct {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    .premium-card {
+        animation: slideInUp 0.6s ease-out forwards;
+        opacity: 1; /* Fixed: Changed from 0 to 1 to prevent hiding */
+    }
+
+    .premium-card:hover {
+        /* Removed conflicting animation that was causing hiding */
+        transform: translateY(-2px) scale(1.02);
+    }
+
+    .premium-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: left 0.5s;
+        z-index: 1;
+    }
+
+    .premium-card:hover::before {
+        left: 100%;
+    }
+
+    .product-image-container {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .product-image-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+        transform: translateX(-100%);
+        transition: transform 0.6s;
+    }
+
+    .premium-card:hover .product-image-container::after {
+        transform: translateX(100%);
+    }
+
+    .page-header {
+        animation: fadeInScale 0.8s ease-out;
+    }
+
+    .filter-sidebar {
+        animation: slideInUp 0.6s ease-out 0.2s forwards;
+        opacity: 0;
+    }
+
+    /* Fixed sidebar layout styles */
+    .shop-layout {
+        height: calc(100vh - 80px);
+        margin-top: 80px;
+    }
+
+    .sidebar-fixed {
+        position: sticky;
+        top: 0;
+        height: calc(100vh - 80px);
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .content-scrollable {
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    /* Custom scrollbar for content area */
+    .content-scrollable::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .content-scrollable::-webkit-scrollbar-track {
+        background: var(--bg-tertiary);
+        border-radius: 3px;
+    }
+
+    .content-scrollable::-webkit-scrollbar-thumb {
+        background: var(--border-secondary);
+        border-radius: 3px;
+    }
+
+    .content-scrollable::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-primary);
+    }
+
+    /* Custom scrollbar for sidebar */
+    .sidebar-fixed::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .sidebar-fixed::-webkit-scrollbar-track {
+        background: var(--bg-tertiary);
+        border-radius: 3px;
+    }
+
+    .sidebar-fixed::-webkit-scrollbar-thumb {
+        background: var(--border-secondary);
+        border-radius: 3px;
+    }
+
+    .sidebar-fixed::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-primary);
+    }
+
+    /* Premium Background Effects */
+    .premium-background {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .premium-background::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 80%, var(--accent-primary)10 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, var(--accent-secondary)10 0%, transparent 50%),
+                    radial-gradient(circle at 40% 40%, var(--accent-primary)05 0%, transparent 50%);
+        animation: gradient-shift 10s ease infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .premium-background > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Floating particles */
+    @keyframes float-particle {
+        0%, 100% {
+            transform: translateY(0px) translateX(0px) rotate(0deg);
+            opacity: 0.3;
+        }
+        33% {
+            transform: translateY(-20px) translateX(10px) rotate(120deg);
+            opacity: 0.6;
+        }
+        66% {
+            transform: translateY(-10px) translateX(-10px) rotate(240deg);
+            opacity: 0.4;
+        }
+    }
+
+    .floating-particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: var(--accent-primary);
+        border-radius: 50%;
+        animation: float-particle 8s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    .floating-particle:nth-child(2) { animation-delay: 1s; top: 20%; left: 20%; }
+    .floating-particle:nth-child(3) { animation-delay: 2s; top: 60%; left: 80%; }
+    .floating-particle:nth-child(4) { animation-delay: 3s; top: 80%; left: 30%; }
+    .floating-particle:nth-child(5) { animation-delay: 4s; top: 40%; left: 70%; }
+</style>
+
+<!-- Premium Main Content with Fixed Sidebar -->
+<div class="premium-background" style="background-color: var(--bg-primary);">
+    <!-- Floating Particles -->
+    <div class="floating-particle"></div>
+    <div class="floating-particle"></div>
+    <div class="floating-particle"></div>
+    <div class="floating-particle"></div>
+    <div class="floating-particle"></div>
+
+    <!-- Fixed Layout Container -->
+    <div class="flex shop-layout">
+        <!-- Fixed Left Sidebar -->
+        <div class="w-80 flex-shrink-0 bg-transparent border-r sidebar-fixed" style="border-color: var(--border-primary);">
+            <div class="px-6 py-6 h-full">
+                <!-- Page Header in Sidebar -->
+                <div class="mb-6 page-header">
+                    <h1 class="text-2xl font-bold" style="color: var(--text-primary);">Shop</h1>
+                    <p class="mt-1 text-sm" style="color: var(--text-tertiary);">Discover our amazing collection</p>
+                </div>
+                <!-- Filters Section -->
+                <div class="rounded-xl shadow-sm p-6 backdrop-blur-sm filter-sidebar"
+                     style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                    <!-- Sort Section -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Sort By</h3>
+                        <form action="/shop" method="get">
+                            <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
+                                <input type="hidden" name="search" value="<%= searchQuery %>">
                             <% } %>
+                            <select class="w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 transition-all duration-200"
+                                    name="sortby" onchange="this.form.submit()"
+                                    style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary); focus:ring-color: var(--accent-primary); focus:border-color: var(--accent-primary);">
+                                <option value="popular" <%= currentSort === 'popular' ? 'selected' : '' %>>Popular</option>
+                                <option value="newest" <%= currentSort === 'newest' ? 'selected' : '' %>>Newest</option>
+                                <option value="price-low" <%= currentSort === 'price-low' ? 'selected' : '' %>>Price: Low to High</option>
+                                <option value="price-high" <%= currentSort === 'price-high' ? 'selected' : '' %>>Price: High to Low</option>
+                            </select>
+                        </form>
+                    </div>
+
+                    <!-- Collections Section -->
+                    <div class="mb-8">
+                        <h4 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Collections</h4>
+                        <div class="space-y-2">
+                            <a class="block text-sm py-2 transition-colors duration-200 hover:translate-x-1 transform"
+                               href="/shop"
+                               style="color: var(--text-secondary);"
+                               onmouseover="this.style.color='var(--accent-primary)'"
+                               onmouseout="this.style.color='var(--text-secondary)'">All Products</a>
+                            <a class="block text-sm py-2 transition-colors duration-200 hover:translate-x-1 transform"
+                               href="/shop?sortby=newest"
+                               style="color: var(--text-secondary);"
+                               onmouseover="this.style.color='var(--accent-primary)'"
+                               onmouseout="this.style.color='var(--text-secondary)'">New Arrivals</a>
+                            <a class="block text-sm py-2 transition-colors duration-200 hover:translate-x-1 transform"
+                               href="/shop?discount=true"
+                               style="color: var(--text-secondary);"
+                               onmouseover="this.style.color='var(--accent-primary)'"
+                               onmouseout="this.style.color='var(--text-secondary)'">Sale Items</a>
+                        </div>
+                    </div>
+
+                    <!-- Quick Filters -->
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Quick Filters</h4>
+                        <div class="space-y-3">
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="checkbox" class="rounded transition-colors duration-200"
+                                       style="border-color: var(--border-secondary); color: var(--accent-primary);">
+                                <span class="ml-2 text-sm group-hover:translate-x-1 transform transition-transform duration-200"
+                                      style="color: var(--text-secondary);">In Stock</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="checkbox" class="rounded transition-colors duration-200"
+                                       style="border-color: var(--border-secondary); color: var(--accent-primary);">
+                                <span class="ml-2 text-sm group-hover:translate-x-1 transform transition-transform duration-200"
+                                      style="color: var(--text-secondary);">On Sale</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="checkbox" class="rounded transition-colors duration-200"
+                                       style="border-color: var(--border-secondary); color: var(--accent-primary);">
+                                <span class="ml-2 text-sm group-hover:translate-x-1 transform transition-transform duration-200"
+                                      style="color: var(--text-secondary);">Free Shipping</span>
+                            </label>
                         </div>
                     </div>
                 </div>
-            <% }) %>
+                <!-- Bottom padding for better scrolling -->
+                <div class="pb-6"></div>
+            </div>
+        </div>
+
+        <!-- Scrollable Right Content Area -->
+        <div class="flex-1 content-scrollable" style="background-color: var(--bg-primary);">
+            <div class="px-8 py-6">
+        <!-- Search Results Header -->
+        <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
+            <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-blue-900 dark:text-blue-100">
+                            Search Results for "<%= searchQuery %>"
+                        </h3>
+                        <p class="text-sm text-blue-700 dark:text-blue-300">
+                            Found <%= products.length %> product<%= products.length !== 1 ? 's' : '' %>
+                        </p>
+                    </div>
+                    <a href="/shop" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 underline">
+                        Clear Search
+                    </a>
+                </div>
+            </div>
+        <% } %>
+
+                <!-- Products Count -->
+                <div class="flex items-center justify-between mb-6">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Showing <%= products.length %> product<%= products.length !== 1 ? 's' : '' %>
+                    </p>
+                </div>
+
+        <% if (products.length === 0) { %>
+                    <!-- Empty State -->
+                    <div class="text-center py-16">
+                        <i class="ri-search-line text-6xl text-gray-400 mb-6"></i>
+                        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">No products found</h3>
+                        <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
+                            <p class="text-gray-600 dark:text-gray-400 mb-8">
+                                No products match your search for "<%= searchQuery %>"
+                            </p>
+                            <a href="/shop" class="inline-block px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 font-medium">
+                                Browse All Products
+                            </a>
+                        <% } else { %>
+                            <p class="text-gray-600 dark:text-gray-400 mb-8">No products available at the moment.</p>
+                        <% } %>
+                    </div>
+        <% } else { %>
+                    <!-- Product Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+                        <% products.forEach(function(product, index){ %>
+                            <div class="group rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden backdrop-blur-sm premium-card"
+                                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary); animation-delay: <%= index * 0.1 %>s;"
+                                 onmouseover="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.1), 0 0 20px var(--accent-primary)33';"
+                                 onmouseout="this.style.borderColor='var(--border-primary)'; this.style.boxShadow='';"
+                                 data-product-id="<%= product._id %>">
+
+                                <!-- Product Image -->
+                                <a href="/product/<%= product._id %>" class="block">
+                                    <div class="relative h-36 overflow-hidden bg-[<%= product.bgcolor %>] flex items-center justify-center">
+                                        <% if (product.image) { %>
+                                            <img class="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
+                                                 src="data:image/jpeg;base64,<%= product.image.toString('base64') %>"
+                                                 alt="<%= product.name %>">
+                                        <% } else { %>
+                                            <div class="text-center" style="color: var(--text-tertiary);">
+                                                <i class="ri-image-line text-2xl mb-1"></i>
+                                                <p class="text-xs">No Image</p>
+                                            </div>
+                                        <% } %>
+
+                                        <!-- Discount Badge -->
+                                        <% if (product.discount > 0) { %>
+                                            <div class="absolute top-2 left-2 text-white text-xs font-bold px-2 py-0.5 rounded-full backdrop-blur-sm"
+                                                 style="background: linear-gradient(135deg, var(--error-500), var(--error-600)); border: 1px solid var(--error-400);">
+                                                <%= product.discount %>%
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                </a>
+
+                                <!-- Product Info -->
+                                <div class="p-3">
+                                    <a href="/product/<%= product._id %>" class="block">
+                                        <h3 class="text-sm font-semibold mb-2 line-clamp-2 leading-tight hover:underline transition-all duration-200" style="color: var(--text-primary);">
+                                            <%= product.name %>
+                                        </h3>
+                                    </a>
+
+                                    <div class="flex items-center justify-between">
+                                        <!-- Price Section -->
+                                        <div class="flex flex-col">
+                                            <div class="flex items-center space-x-2">
+                                                <span class="text-base font-bold" style="color: var(--accent-primary);">
+                                                    ₹<%= (product.price - (product.price * (product.discount/100))).toFixed(0) %>
+                                                </span>
+                                                <% if (product.discount > 0) { %>
+                                                    <span class="text-xs line-through" style="color: var(--text-tertiary);">
+                                                        ₹<%= product.price.toFixed(0) %>
+                                                    </span>
+                                                <% } %>
+                                            </div>
+                                        </div>
+
+                                        <!-- Add to Cart Button -->
+                                        <% if (typeof loggedIn !== 'undefined' && loggedIn) { %>
+                                            <button onclick="addToCartWithCounter('<%= product._id %>')"
+                                                    class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110 shadow-md hover:shadow-lg"
+                                                    style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; border: 1px solid var(--accent-primary);"
+                                                    title="Add to Cart">
+                                                <i class="ri-shopping-cart-line text-sm"></i>
+                                            </button>
+                                        <% } else { %>
+                                            <button onclick="showLoginPrompt('add to cart')"
+                                                    class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110 shadow-md hover:shadow-lg"
+                                                    style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; border: 1px solid var(--accent-primary);"
+                                                    title="Login to Add to Cart">
+                                                <i class="ri-shopping-cart-line text-sm"></i>
+                                            </button>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } %>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Show login prompt function
+    function showLoginPrompt(action) {
+        showFlashMessage('info', `Please login to ${action}. Click the login button in the top navigation.`);
+    }
+
+    // Add to cart with counter update
+    async function addToCartWithCounter(productId) {
+        try {
+            // Show loading state
+            const button = event.target.closest('button');
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i class="ri-loader-4-line animate-spin"></i>';
+            button.disabled = true;
+
+            const response = await fetch(`/addtocart/${productId}`, {
+                method: 'GET'
+            });
+
+            if (response.ok) {
+                // Update cart counter
+                if (window.updateCartCounter) {
+                    window.updateCartCounter();
+                }
+
+                // Show success feedback
+                button.innerHTML = '<i class="ri-check-line text-green-400"></i>';
+                setTimeout(() => {
+                    button.innerHTML = originalContent;
+                    button.disabled = false;
+                }, 1000);
+
+                // Show flash message
+                showFlashMessage('success', 'Item added to cart!');
+            } else {
+                throw new Error('Failed to add item to cart');
+            }
+        } catch (error) {
+            console.error('Add to cart error:', error);
+
+            // Reset button
+            const button = event.target.closest('button');
+            button.innerHTML = originalContent;
+            button.disabled = false;
+
+            showFlashMessage('error', 'Failed to add item to cart');
+        }
+    }
+
+    function showFlashMessage(type, message) {
+        // Create flash message element
+        const flashMessage = document.createElement('div');
+        flashMessage.className = `flash-message fixed top-20 left-1/2 transform -translate-x-1/2 p-4 pr-12 rounded-xl z-50 shadow-2xl min-w-80 max-w-md backdrop-blur-lg`;
+
+        let bgStyle, iconClass;
+        if (type === 'success') {
+            bgStyle = 'background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);';
+            iconClass = 'ri-check-circle-line';
+        } else if (type === 'info') {
+            bgStyle = 'background: linear-gradient(135deg, #3b82f6, #2563eb); border: 1px solid #60a5fa; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);';
+            iconClass = 'ri-information-line';
+        } else {
+            bgStyle = 'background: linear-gradient(135deg, #ef4444, #dc2626); border: 1px solid #f87171; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);';
+            iconClass = 'ri-error-warning-line';
+        }
+
+        flashMessage.style.cssText = bgStyle;
+        flashMessage.innerHTML = `
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="${iconClass} text-white text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <span class="block text-white font-medium">${message}</span>
+                </div>
+            </div>
+            <button class="absolute top-2 right-3 text-white hover:text-gray-200 text-xl font-bold transition-colors duration-200" onclick="this.parentElement.remove()">&times;</button>
+        `;
+
+        document.body.appendChild(flashMessage);
+
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            if (flashMessage.parentNode) {
+                flashMessage.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                flashMessage.style.transform = 'translateX(-50%) translateY(-20px)';
+                flashMessage.style.opacity = '0';
+                setTimeout(() => {
+                    if (flashMessage.parentNode) {
+                        flashMessage.parentNode.removeChild(flashMessage);
+                    }
+                }, 400);
+            }
+        }, 3000);
+    }
+</script>
+
 <%- include('./partials/footer') %>

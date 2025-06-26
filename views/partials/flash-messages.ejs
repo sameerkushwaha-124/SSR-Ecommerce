@@ -1,0 +1,135 @@
+<!-- Enhanced Flash Messages -->
+<% if(typeof success !== 'undefined' && success && success.length > 0){ %>
+    <div class="flash-message fixed top-20 left-1/2 transform -translate-x-1/2 p-4 pr-12 rounded-xl z-50 shadow-2xl min-w-80 max-w-md backdrop-blur-lg"
+         style="background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <i class="ri-check-circle-line text-white text-xl"></i>
+            </div>
+            <div class="ml-3">
+                <span class="block text-white font-medium">
+                    <%= success[0] %>
+                </span>
+            </div>
+        </div>
+        <button class="absolute top-2 right-3 text-white hover:text-green-100 text-xl font-bold transition-colors duration-200" onclick="hideFlashMessageManual(this.parentElement)">&times;</button>
+    </div>
+<% } %>
+
+<% if(typeof error !== 'undefined' && error && error.length > 0){ %>
+    <div class="flash-message fixed top-20 left-1/2 transform -translate-x-1/2 p-4 pr-12 rounded-xl z-50 shadow-2xl min-w-80 max-w-md backdrop-blur-lg"
+         style="background: linear-gradient(135deg, #ef4444, #dc2626); border: 1px solid #f87171; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <i class="ri-error-warning-line text-white text-xl"></i>
+            </div>
+            <div class="ml-3">
+                <span class="block text-white font-medium">
+                    <%= error[0] %>
+                </span>
+            </div>
+        </div>
+        <button class="absolute top-2 right-3 text-white hover:text-red-100 text-xl font-bold transition-colors duration-200" onclick="hideFlashMessageManual(this.parentElement)">&times;</button>
+    </div>
+<% } %>
+
+<% if(typeof info !== 'undefined' && info && info.length > 0){ %>
+    <div class="flash-message fixed top-20 left-1/2 transform -translate-x-1/2 p-4 pr-12 rounded-xl z-50 shadow-2xl min-w-80 max-w-md backdrop-blur-lg"
+         style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: 1px solid #60a5fa; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <i class="ri-information-line text-white text-xl"></i>
+            </div>
+            <div class="ml-3">
+                <span class="block text-white font-medium">
+                    <%= info[0] %>
+                </span>
+            </div>
+        </div>
+        <button class="absolute top-2 right-3 text-white hover:text-blue-100 text-xl font-bold transition-colors duration-200" onclick="hideFlashMessageManual(this.parentElement)">&times;</button>
+    </div>
+<% } %>
+
+<script>
+    // Flash message functionality - works on all pages
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            const flashMessages = document.querySelectorAll('.flash-message');
+
+            flashMessages.forEach(function(message) {
+                // Add entrance animation
+                message.style.transform = 'translateX(-50%) translateY(-20px)';
+                message.style.opacity = '0';
+
+                // Animate in
+                setTimeout(function() {
+                    message.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                    message.style.transform = 'translateX(-50%) translateY(0)';
+                    message.style.opacity = '1';
+                }, 50);
+
+                // Add click to dismiss functionality
+                message.style.cursor = 'pointer';
+                message.addEventListener('click', function() {
+                    hideFlashMessage(message);
+                });
+
+                // Auto-hide after 5 seconds
+                setTimeout(function() {
+                    hideFlashMessage(message);
+                }, 5000);
+            });
+        }, 100);
+
+        function hideFlashMessage(message) {
+            message.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            message.style.transform = 'translateX(-50%) translateY(-20px)';
+            message.style.opacity = '0';
+            setTimeout(function() {
+                if (message.parentNode) {
+                    message.parentNode.removeChild(message);
+                }
+            }, 400);
+        }
+    });
+
+    // Global function for manual close button
+    function hideFlashMessageManual(message) {
+        message.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        message.style.transform = 'translateX(-50%) translateY(-20px)';
+        message.style.opacity = '0';
+        setTimeout(function() {
+            if (message.parentNode) {
+                message.parentNode.removeChild(message);
+            }
+        }, 400);
+    }
+</script>
+
+<style>
+    /* Flash message specific styles */
+
+    .flash-message {
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    .flash-message::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        border-radius: inherit;
+        pointer-events: none;
+    }
+
+
+
+    .flash-message:hover {
+        transform: translateX(-50%) translateY(-2px);
+        box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+</style>

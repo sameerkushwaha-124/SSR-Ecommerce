@@ -1,72 +1,115 @@
 <%- include('./partials/owner-header') %>
+<%- include('./partials/flash-messages') %>
 
-<div class="w-full h-screen flex px-20">
-    <div class="w-1/2 flex items-center justify-center h-screen">
-        <div class="w-full px-32">
-            <h4 class="text-4xl font-semibold mb-5">Create Owner</h4>
-            <form action="/owners/create" method="post" autocomplete="off">
-                <input
-                    class="block bg-zinc-100 w-full px-3 py-2 border-[1px] rounded-md mb-3 border-zinc-200"
-                    type="text"
-                    placeholder="Full Name"
-                    name="fullname"
-                    required
-                >
-                <input
-                    class="block bg-zinc-100 w-full px-3 py-2 border-[1px] rounded-md mb-3 border-zinc-200"
-                    type="email"
-                    placeholder="Email"
-                    name="email"
-                    required
-                >
-                <input
-                    class="block bg-zinc-100 w-full px-3 py-2 border-[1px] rounded-md mb-3 border-zinc-200"
-                    type="password"
-                    placeholder="Password"
-                    name="password"
-                    required
-                >
-                <input
-                    class="px-5 rounded-full py-3 mt-2 bg-blue-500 text-white cursor-pointer"
-                    type="submit"
-                    value="Create"
-                >
-            </form>
+<div class="min-h-screen pt-20 pb-10" style="background-color: var(--bg-primary);">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);">
+                Welcome to <span style="color: var(--accent-primary);">Velora</span> Owner Portal
+            </h1>
+            <p class="text-xl" style="color: var(--text-tertiary);">Manage your e-commerce store with ease</p>
         </div>
-    </div>
-    <div class="w-1/2 flex items-center justify-center h-screen">
-        <div class="w-full px-32">
-            <h4 class="text-2xl capitalize mb-5">Owner Access</h4>
 
-            <% if (error && error.length > 0) { %>
-                <div
-                    class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-3"
-                >
-                    <%= error[0] %>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Register Section -->
+            <div class="rounded-xl shadow-sm p-8 backdrop-blur-sm"
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <h3 class="text-2xl font-bold mb-2" style="color: var(--text-primary);">Create Owner Account</h3>
+                <p class="mb-6" style="color: var(--text-tertiary);">Start managing your online store today</p>
+
+                <form action="/owners/create" method="post" autocomplete="off" class="space-y-4">
+                    <input
+                        class="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                        style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"
+                        onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 2px var(--accent-primary)33';"
+                        onblur="this.style.borderColor='var(--border-primary)'; this.style.boxShadow='none';"
+                        type="text" placeholder="Full Name" name="fullname" required>
+                    <input
+                        class="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                        style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"
+                        onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 2px var(--accent-primary)33';"
+                        onblur="this.style.borderColor='var(--border-primary)'; this.style.boxShadow='none';"
+                        type="email" placeholder="Email" name="email" required>
+                    <input
+                        class="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                        style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"
+                        onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 2px var(--accent-primary)33';"
+                        onblur="this.style.borderColor='var(--border-primary)'; this.style.boxShadow='none';"
+                        type="password" placeholder="Password" name="password" required>
+                    <button class="w-full py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl relative overflow-hidden group"
+                            style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; border: 1px solid var(--accent-primary);"
+                            type="submit">
+                        <span class="relative z-10 flex items-center justify-center">
+                            <i class="ri-user-add-line mr-2"></i>Create Owner Account
+                        </span>
+                        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                             style="background: linear-gradient(135deg, var(--accent-hover), var(--accent-primary));"></div>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Login Section -->
+            <div class="rounded-xl shadow-sm p-8 backdrop-blur-sm"
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <h3 class="text-2xl font-bold mb-2" style="color: var(--text-primary);">Owner Access</h3>
+                <p class="mb-6" style="color: var(--text-tertiary);">Access your owner dashboard</p>
+
+                <form action="/owners/login" method="post" autocomplete="off" class="space-y-4">
+                    <input
+                        class="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                        style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"
+                        onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 2px var(--accent-primary)33';"
+                        onblur="this.style.borderColor='var(--border-primary)'; this.style.boxShadow='none';"
+                        type="email" placeholder="Email" name="email" required>
+                    <input
+                        class="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                        style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"
+                        onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 2px var(--accent-primary)33';"
+                        onblur="this.style.borderColor='var(--border-primary)'; this.style.boxShadow='none';"
+                        type="password" placeholder="Password" name="password" required>
+                    <button class="w-full py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl relative overflow-hidden group"
+                            style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; border: 1px solid var(--accent-primary);"
+                            type="submit">
+                        <span class="relative z-10 flex items-center justify-center">
+                            <i class="ri-login-box-line mr-2"></i>Login
+                        </span>
+                        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                             style="background: linear-gradient(135deg, var(--accent-hover), var(--accent-primary));"></div>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="mt-16">
+            <h2 class="text-2xl font-bold text-center mb-8" style="color: var(--text-primary);">Owner Dashboard Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center p-6 rounded-xl" style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                    <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+                         style="background: linear-gradient(135deg, var(--primary-500), var(--primary-600));">
+                        <i class="ri-product-hunt-line text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2" style="color: var(--text-primary);">Product Management</h3>
+                    <p class="text-sm" style="color: var(--text-tertiary);">Add, edit, and delete products with ease</p>
                 </div>
-            <% } %>
-
-            <form action="/owners/login" method="post" autocomplete="off">
-                <input
-                    class="block bg-zinc-100 w-full px-3 py-2 border-[1px] rounded-md mb-3 border-zinc-200"
-                    type="email"
-                    placeholder="Email"
-                    name="email"
-                    required
-                >
-                <input
-                    class="block bg-zinc-100 w-full px-3 py-2 border-[1px] rounded-md mb-3 border-zinc-200"
-                    type="password"
-                    placeholder="Password"
-                    name="password"
-                    required
-                >
-                <input
-                    class="px-5 rounded-full py-3 mt-2 bg-blue-500 text-white cursor-pointer"
-                    type="submit"
-                    value="Login"
-                >
-            </form>
+                <div class="text-center p-6 rounded-xl" style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                    <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+                         style="background: linear-gradient(135deg, var(--success-500), var(--success-600));">
+                        <i class="ri-dashboard-line text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2" style="color: var(--text-primary);">Analytics Dashboard</h3>
+                    <p class="text-sm" style="color: var(--text-tertiary);">Track your store's performance</p>
+                </div>
+                <div class="text-center p-6 rounded-xl" style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                    <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+                         style="background: linear-gradient(135deg, var(--warning-400), #f59e0b);">
+                        <i class="ri-settings-line text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2" style="color: var(--text-primary);">Store Settings</h3>
+                    <p class="text-sm" style="color: var(--text-tertiary);">Customize your store preferences</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>

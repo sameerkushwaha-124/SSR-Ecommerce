@@ -1,0 +1,179 @@
+<%- include('./partials/owner-header') %>
+<%- include('./partials/flash-messages') %>
+
+<div class="min-h-screen pt-20 pb-10" style="background-color: var(--bg-primary);">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Profile Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold" style="color: var(--text-primary);">Owner Profile</h1>
+            <p class="mt-2" style="color: var(--text-tertiary);">Manage your account settings</p>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="rounded-xl shadow-sm p-8 mb-8 backdrop-blur-sm" 
+             style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+            
+            <!-- Profile Header Section -->
+            <div class="flex items-center space-x-6 mb-8">
+                <div class="w-24 h-24 rounded-full flex items-center justify-center"
+                     style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));">
+                    <span class="text-3xl font-bold text-white">
+                        <%= owner.fullname ? owner.fullname.charAt(0).toUpperCase() : 'O' %>
+                    </span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold" style="color: var(--text-primary);">
+                        <%= owner.fullname || 'Owner' %>
+                    </h2>
+                    <p class="text-lg" style="color: var(--text-secondary);"><%= owner.email %></p>
+                    <p class="text-sm" style="color: var(--text-tertiary);">
+                        Owner since <%= new Date(owner.createdAt || Date.now()).toLocaleDateString() %>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Profile Form -->
+            <form action="/owners/profile/update" method="POST" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Full Name -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">
+                            Full Name
+                        </label>
+                        <input type="text" name="fullname" value="<%= owner.fullname || '' %>" 
+                               class="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                               style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"
+                               onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 2px var(--accent-primary)33';"
+                               onblur="this.style.borderColor='var(--border-primary)'; this.style.boxShadow='none';"
+                               placeholder="Enter your full name">
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">
+                            Email Address
+                        </label>
+                        <input type="email" name="email" value="<%= owner.email %>" 
+                               class="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                               style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);"
+                               onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 2px var(--accent-primary)33';"
+                               onblur="this.style.borderColor='var(--border-primary)'; this.style.boxShadow='none';"
+                               placeholder="Enter your email">
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div class="flex justify-end pt-4">
+                    <button type="submit" 
+                            class="px-8 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl relative overflow-hidden group"
+                            style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; border: 1px solid var(--accent-primary);">
+                        <span class="relative z-10 flex items-center">
+                            <i class="ri-save-line mr-2"></i>Update Profile
+                        </span>
+                        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                             style="background: linear-gradient(135deg, var(--accent-hover), var(--accent-primary));"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Account Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Total Products -->
+            <div class="rounded-xl shadow-sm p-6 backdrop-blur-sm text-center" 
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <div class="w-12 h-12 rounded-lg mx-auto mb-4 flex items-center justify-center"
+                     style="background: linear-gradient(135deg, var(--primary-500), var(--primary-600));">
+                    <i class="ri-product-hunt-line text-white text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-2" style="color: var(--text-primary);" id="totalProducts">-</h3>
+                <p class="text-sm" style="color: var(--text-tertiary);">Total Products</p>
+            </div>
+
+            <!-- Account Status -->
+            <div class="rounded-xl shadow-sm p-6 backdrop-blur-sm text-center" 
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <div class="w-12 h-12 rounded-lg mx-auto mb-4 flex items-center justify-center"
+                     style="background: linear-gradient(135deg, var(--success-500), var(--success-600));">
+                    <i class="ri-shield-check-line text-white text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-2" style="color: var(--text-primary);">Active</h3>
+                <p class="text-sm" style="color: var(--text-tertiary);">Account Status</p>
+            </div>
+
+            <!-- Last Login -->
+            <div class="rounded-xl shadow-sm p-6 backdrop-blur-sm text-center" 
+                 style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+                <div class="w-12 h-12 rounded-lg mx-auto mb-4 flex items-center justify-center"
+                     style="background: linear-gradient(135deg, var(--warning-400), #f59e0b);">
+                    <i class="ri-time-line text-white text-xl"></i>
+                </div>
+                <h3 class="text-lg font-bold mb-2" style="color: var(--text-primary);">Today</h3>
+                <p class="text-sm" style="color: var(--text-tertiary);">Last Login</p>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="rounded-xl shadow-sm p-6 backdrop-blur-sm" 
+             style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
+            <h3 class="text-xl font-semibold mb-6" style="color: var(--text-primary);">Quick Actions</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="/owners/dashboard" 
+                   class="p-4 rounded-lg transition-all duration-300 transform hover:scale-105 text-center group"
+                   style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary);"
+                   onmouseover="this.style.backgroundColor='var(--accent-primary)'; this.style.color='white'; this.style.borderColor='var(--accent-primary)';"
+                   onmouseout="this.style.backgroundColor='var(--bg-tertiary)'; this.style.color='var(--text-primary)'; this.style.borderColor='var(--border-primary)';">
+                    <i class="ri-dashboard-line text-2xl mb-2 block"></i>
+                    <span class="text-sm font-medium">Dashboard</span>
+                </a>
+                <a href="/owners/products" 
+                   class="p-4 rounded-lg transition-all duration-300 transform hover:scale-105 text-center group"
+                   style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary);"
+                   onmouseover="this.style.backgroundColor='var(--accent-primary)'; this.style.color='white'; this.style.borderColor='var(--accent-primary)';"
+                   onmouseout="this.style.backgroundColor='var(--bg-tertiary)'; this.style.color='var(--text-primary)'; this.style.borderColor='var(--border-primary)';">
+                    <i class="ri-list-check text-2xl mb-2 block"></i>
+                    <span class="text-sm font-medium">Manage Products</span>
+                </a>
+                <a href="/owners/create-products" 
+                   class="p-4 rounded-lg transition-all duration-300 transform hover:scale-105 text-center group"
+                   style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary);"
+                   onmouseover="this.style.backgroundColor='var(--accent-primary)'; this.style.color='white'; this.style.borderColor='var(--accent-primary)';"
+                   onmouseout="this.style.backgroundColor='var(--bg-tertiary)'; this.style.color='var(--text-primary)'; this.style.borderColor='var(--border-primary)';">
+                    <i class="ri-add-box-line text-2xl mb-2 block"></i>
+                    <span class="text-sm font-medium">Add Product</span>
+                </a>
+                <a href="/shop" target="_blank"
+                   class="p-4 rounded-lg transition-all duration-300 transform hover:scale-105 text-center group"
+                   style="background-color: var(--bg-tertiary); border: 1px solid var(--border-primary);"
+                   onmouseover="this.style.backgroundColor='var(--accent-primary)'; this.style.color='white'; this.style.borderColor='var(--accent-primary)';"
+                   onmouseout="this.style.backgroundColor='var(--bg-tertiary)'; this.style.color='var(--text-primary)'; this.style.borderColor='var(--border-primary)';">
+                    <i class="ri-external-link-line text-2xl mb-2 block"></i>
+                    <span class="text-sm font-medium">View Shop</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Load total products count
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const response = await fetch('/owners/products');
+            if (response.ok) {
+                // This is a simple way to get the count
+                // In a real app, you'd have a dedicated API endpoint
+                const text = await response.text();
+                const matches = text.match(/Showing (\d+) product/);
+                if (matches) {
+                    document.getElementById('totalProducts').textContent = matches[1];
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load product count:', error);
+            document.getElementById('totalProducts').textContent = '0';
+        }
+    });
+</script>
+
+<%- include('./partials/footer') %>
