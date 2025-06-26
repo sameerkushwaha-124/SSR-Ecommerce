@@ -7,6 +7,14 @@ const expressSession = require("express-session");
 const flash = require("connect-flash");
 dotenv.config();
 
+// Try to load MongoStore, fallback to MemoryStore if not available
+let MongoStore = null;
+try {
+  MongoStore = require("connect-mongo");
+} catch (error) {
+  console.warn("connect-mongo not found, using MemoryStore (not recommended for production)");
+}
+
 const connectDB = require("./config/mongoose-connection");
 connectDB(); // call it
 
@@ -14,17 +22,55 @@ connectDB(); // call it
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  expressSession({
-    resave: false,
-    saveUninitialized: false,
-    secret: process.env.EXPRESS_SESSION_SECRET,
-    cookie: {
-      secure: process.env.NODE_ENV === "production", // works with HTTPS only
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
-    },
-  })
-);
+// Session configuration with MongoDB store for production
+const sessionConfig = {
+  resave: false,
+  saveUninitialized: false,
+  secret: process.env.EXPRESS_SESSION_SECRET,
+  cookie: {
+    secure: process.env.NODE_ENV === "production" && process.env.FORCE_HTTPS === "true",
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24, // 1 day
+    sameSite: process.env.NODE_ENV === "production" ? 'strict' : 'lax',
+  },
+  name: 'sessionId',
+};
+
+// Use MongoDB store in production if available, MemoryStore otherwise
+if (process.env.NODE_ENV === "production" && MongoStore) {
+  try {
+    sessionConfig.store = MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      touchAfter: 24 * 3600, // lazy session update
+      crypto: {
+        secret: process.env.EXPRESS_SESSION_SECRET
+      },
+      collectionName: 'sessions',
+      ttl: 24 * 60 * 60, // 1 day in seconds
+    });
+
+    // Handle store events
+    sessionConfig.store.on('error', (error) => {
+      console.error('Session store error:', error);
+    });
+
+    sessionConfig.store.on('connected', () => {
+      console.log('MongoDB session store connected');
+    });
+
+    console.log("✅ Using MongoDB session store for production");
+  } catch (error) {
+    console.error("❌ Failed to create MongoDB session store:", error);
+    console.log("⚠️  Falling back to MemoryStore (not recommended for production)");
+  }
+} else if (process.env.NODE_ENV === "production" && !MongoStore) {
+  console.warn("⚠️  connect-mongo not installed! Using MemoryStore in production (not recommended)");
+  console.log("📦 Install with: npm install connect-mongo");
+} else {
+  console.log("🔧 Using MemoryStore for development");
+}
+
+app.use(expressSession(sessionConfig));
 
 app.use(flash());
 app.use((req, res, next) => {

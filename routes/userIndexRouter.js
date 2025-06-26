@@ -431,6 +431,11 @@ router.post('/buy-now', isLoggedInUser, async (req, res) => {
     const { productId, selectedColor, selectedSize, quantity = 1 } = req.body;
     const productsModel = require('../models/products-model');
 
+    // Validate input
+    if (!productId) {
+      return res.json({ success: false, message: 'Product ID is required' });
+    }
+
     // Get product details
     const product = await productsModel.findById(productId);
     if (!product) {
@@ -452,11 +457,24 @@ router.post('/buy-now', isLoggedInUser, async (req, res) => {
     // Store in session for checkout
     req.session.buyNowItem = checkoutItem;
 
-    res.json({
-      success: true,
-      message: 'Redirecting to checkout...',
-      redirectUrl: '/checkout'
+    // Force session save to ensure it's persisted
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.json({ success: false, message: 'Failed to save session data' });
+      }
+
+      if (process.env.NODE_ENV !== "production") {
+        console.log('Buy now session saved:', checkoutItem);
+      }
+
+      res.json({
+        success: true,
+        message: 'Redirecting to checkout...',
+        redirectUrl: `/checkout?product=${productId}&qty=${quantity}&color=${encodeURIComponent(selectedColor || '')}&size=${encodeURIComponent(selectedSize || '')}`
+      });
     });
+
   } catch (error) {
     console.error('Buy now error:', error);
     res.json({ success: false, message: 'Failed to process buy now request' });
@@ -466,10 +484,38 @@ router.post('/buy-now', isLoggedInUser, async (req, res) => {
 // Checkout Page Route
 router.get('/checkout', isLoggedInUser, async (req, res) => {
   try {
-    const checkoutItem = req.session.buyNowItem;
+    let checkoutItem = req.session.buyNowItem;
+
+    if (process.env.NODE_ENV !== "production") {
+      console.log('Checkout session data:', checkoutItem);
+      console.log('Session ID:', req.sessionID);
+      console.log('URL params:', req.query);
+    }
+
+    // Fallback: If session data is missing, try to reconstruct from URL parameters
+    if (!checkoutItem && req.query.product) {
+      const productsModel = require('../models/products-model');
+      const product = await productsModel.findById(req.query.product);
+
+      if (product) {
+        checkoutItem = {
+          productId: product._id,
+          productName: product.name,
+          productPrice: product.price,
+          selectedColor: req.query.color || product.colors?.[0],
+          selectedSize: req.query.size || product.sizes?.[0],
+          quantity: parseInt(req.query.qty) || 1,
+          price: product.price,
+          total: product.price * (parseInt(req.query.qty) || 1)
+        };
+
+        // Save to session for future use
+        req.session.buyNowItem = checkoutItem;
+      }
+    }
 
     if (!checkoutItem) {
-      req.flash('error', 'No item selected for checkout');
+      req.flash('error', 'No item selected for checkout. Please try the buy now process again.');
       return res.redirect('/shop');
     }
 

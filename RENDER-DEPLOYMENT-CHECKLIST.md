@@ -13,6 +13,8 @@
 - [x] `.env` file exists locally (not committed)
 - [x] `.gitignore` includes `.env`
 - [x] Environment variables documented
+- [x] MongoDB session store configured for production
+- [x] Session security settings configured
 
 ### 🗄️ Database Configuration
 - [x] MongoDB Atlas connection string ready

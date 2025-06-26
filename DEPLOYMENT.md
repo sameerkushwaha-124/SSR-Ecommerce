@@ -16,7 +16,13 @@ PORT=5000
 JWT_KEY=asfdasfaskfjhhjknsjisdnjsdn
 EXPRESS_SESSION_SECRET=supersecretkey123
 NODE_ENV=production
+FORCE_HTTPS=false
 ```
+
+### 🔧 Session Store Configuration:
+- **MongoDB Session Store**: Automatically configured for production
+- **FORCE_HTTPS**: Set to `true` if you have proper HTTPS, `false` otherwise
+- **Session Security**: Configured with httpOnly, sameSite protection
 
 ## 🚀 Deployment Steps
 
