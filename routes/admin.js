@@ -108,7 +108,8 @@ router.get('/stats', adminAuth, async (req, res) => {
     const totalContent = await Content.countDocuments();
     const dsaContent = await Content.countDocuments({ category: 'DSA' });
     const oopContent = await Content.countDocuments({ category: 'OOP' });
-    
+    const sqlContent = await Content.countDocuments({ category: 'SQL' });
+
     // Get unique topics
     const allContent = await Content.find({}, 'subTopic');
     const uniqueTopics = [...new Set(allContent.map(item => item.subTopic))].length;
@@ -117,6 +118,7 @@ router.get('/stats', adminAuth, async (req, res) => {
       totalContent,
       dsaContent,
       oopContent,
+      sqlContent,
       uniqueTopics
     });
   } catch (error) {
