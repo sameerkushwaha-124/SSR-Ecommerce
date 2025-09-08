@@ -5,7 +5,7 @@ const router = express.Router();
 
 // Admin credentials (in production, store in database)
 const ADMIN_CREDENTIALS = {
-  email: 'admin@studymaterial.com',
+  email: 'admin@gmail.com',
   password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
   name: 'Admin User'
 };

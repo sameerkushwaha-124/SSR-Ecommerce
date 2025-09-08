@@ -28,6 +28,7 @@ module.exports.isLoggedInUser = async function(req, res, next) {
 
         req.user = user;
         next();
+        
     } catch (err) {
         // Clear the token if there's an authentication error
         res.clearCookie("userToken");
