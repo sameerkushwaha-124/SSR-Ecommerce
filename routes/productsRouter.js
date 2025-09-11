@@ -21,7 +21,6 @@ router.post('/create', isLoggedInAdmin , upload.single("image") , async (req,res
         req.flash("success", "Product created successfully");
         res.redirect("/owners/products");
     }catch(err){
-        console.error("Product creation error:", err);
         req.flash("error", "Failed to create product: " + err.message);
         res.redirect("/owners/create-products");
     }
@@ -40,7 +39,6 @@ router.get('/stats', isLoggedInAdmin, async (req, res) => {
             recentProducts
         });
     } catch (error) {
-        console.error("Product stats error:", error);
         res.json({ success: false, message: "Failed to get product statistics" });
     }
 });
@@ -68,7 +66,6 @@ router.put('/update/:id', isLoggedInAdmin, upload.single("image"), async (req, r
         req.flash("success", "Product updated successfully");
         res.json({ success: true, message: "Product updated successfully" });
     } catch (error) {
-        console.error("Product update error:", error);
         res.json({ success: false, message: "Failed to update product" });
     }
 });

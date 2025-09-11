@@ -68,7 +68,18 @@ const orderSchema = new mongoose.Schema({
     },
     trackingNumber: {
         type: String
-    }
+    },
+    // models/order-model.js - Add these fields to your existing schema
+razorpayOrderId: {
+    type: String
+},
+razorpayPaymentId: {
+    type: String
+},
+razorpaySignature: {
+    type: String
+}
+
 }, {
     timestamps: true
 });

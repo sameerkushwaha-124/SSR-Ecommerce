@@ -22,6 +22,8 @@ connectDB(); // call it
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
 // Session configuration with MongoDB store for production
 const sessionConfig = {
   resave: false,

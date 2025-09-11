@@ -5,6 +5,8 @@ const productsModel = require('../models/products-model');
 const router = express.Router();
 const userModel = require('../models/users-model');
 const { getUserProfile, updateUserProfile, changePassword, getOrderHistory, searchUserData } = require('../controllers/userProfileController');
+const razorpay = require('../config/razorpay-config');
+const crypto = require('crypto');
 
 router.get('/', async (req, res) => {
   // Check if user is already logged in
@@ -72,7 +74,6 @@ router.get('/shop', async (req, res) => {
       loggedIn: !!user
     });
   } catch (error) {
-    console.error('Shop error:', error);
     res.render('shop', {
       products: [],
       searchQuery: '',
@@ -104,7 +105,7 @@ router.get('/addtocart/:productId',isLoggedInUser ,async(req,res)=>{
 
     res.redirect('/shop');
   } catch (error) {
-    console.error('Add to cart error:', error);
+
     req.flash('error', 'Failed to add item to cart');
     res.redirect('/shop');
   }
@@ -133,7 +134,6 @@ router.post('/cart/add/:productId', isLoggedInUser, async (req, res) => {
       res.json({ success: false, message: 'Item not found in cart' });
     }
   } catch (error) {
-    console.error('Cart add error:', error);
     res.json({ success: false, message: 'Failed to update cart' });
   }
 });
@@ -160,7 +160,6 @@ router.get('/cart/add/:productId', isLoggedInUser, async (req, res) => {
 
     res.redirect('/cart');
   } catch (error) {
-    console.error('Cart add error:', error);
     req.flash('error', 'Failed to update cart');
     res.redirect('/cart');
   }
@@ -202,7 +201,6 @@ router.post('/cart/remove/:productId', isLoggedInUser, async (req, res) => {
       res.json({ success: false, message: 'Item not found in cart' });
     }
   } catch (error) {
-    console.error('Cart remove error:', error);
     res.json({ success: false, message: 'Failed to update cart' });
   }
 });
@@ -234,7 +232,6 @@ router.get('/cart/remove/:productId', isLoggedInUser, async (req, res) => {
 
     res.redirect('/cart');
   } catch (error) {
-    console.error('Cart remove error:', error);
     req.flash('error', 'Failed to update cart');
     res.redirect('/cart');
   }
@@ -281,7 +278,6 @@ router.get('/cart', isLoggedInUser, async(req, res) => {
     
   } catch (error) {
     if(process.env.NODE_ENV !== "production") 
-      console.error('Cart error:', error);
     req.flash('error', 'Failed to load your cart');
     res.redirect('/');
   }
@@ -296,7 +292,6 @@ router.get('/cart/remove-all/:productId', isLoggedInUser, async (req, res) => {
     req.flash('success', 'Item removed from cart!');
     res.redirect('/cart');
   } catch (error) {
-    console.error('Remove all error:', error);
     req.flash('error', 'Failed to remove item from cart');
     res.redirect('/cart');
   }
@@ -319,7 +314,6 @@ router.get('/api/cart/count', isLoggedInUser, async (req, res) => {
       uniqueItems: user.cart.length
     });
   } catch (error) {
-    console.error('Cart count error:', error);
     res.json({ success: false, count: 0 });
   }
 });
@@ -346,7 +340,6 @@ router.get('/product/:id', async (req, res) => {
 
     res.render('product-detail', { product, user, loggedIn: !!user });
   } catch (error) {
-    console.error('Product detail error:', error);
     res.redirect('/shop');
   }
 });
@@ -379,7 +372,9 @@ router.get('/account/orders', isLoggedInUser, async (req, res) => {
           // Remove the original buffer to avoid JSON serialization issues
           delete orderObj.product.image;
         } catch (imageError) {
-          console.error('Image conversion error:', imageError);
+          res.json({
+            success: false, message: 'Failed to process product image'
+          })
         }
       }
 
@@ -388,7 +383,6 @@ router.get('/account/orders', isLoggedInUser, async (req, res) => {
 
     res.json({ success: true, orders: cleanOrders });
   } catch (error) {
-    console.error('Get orders error:', error);
     res.json({ success: false, message: 'Failed to fetch orders' });
   }
 });
@@ -405,7 +399,6 @@ router.post('/account/deactivate', isLoggedInUser, async (req, res) => {
     req.flash('success', 'Account deactivated successfully');
     res.json({ success: true, message: 'Account deactivated successfully' });
   } catch (error) {
-    console.error('Account deactivation error:', error);
     res.json({ success: false, message: 'Failed to deactivate account' });
   }
 });
@@ -420,7 +413,7 @@ router.post('/account/activate', isLoggedInUser, async (req, res) => {
     req.flash('success', 'Account activated successfully');
     res.json({ success: true, message: 'Account activated successfully' });
   } catch (error) {
-    console.error('Account activation error:', error);
+
     res.json({ success: false, message: 'Failed to activate account' });
   }
 });
@@ -460,7 +453,6 @@ router.post('/buy-now', isLoggedInUser, async (req, res) => {
     // Force session save to ensure it's persisted
     req.session.save((err) => {
       if (err) {
-        console.error('Session save error:', err);
         return res.json({ success: false, message: 'Failed to save session data' });
       }
 
@@ -652,4 +644,109 @@ router.post('/account/delete', isLoggedInUser, async (req, res) => {
   }
 });
 
+router.post('/create-razorpay-order', isLoggedInUser, async (req, res) => {
+    try {
+        const checkoutItem = req.session.buyNowItem;
+        
+        if (!checkoutItem) {
+            return res.json({ success: false, message: 'No item selected for checkout' });
+        }
+
+        const options = {
+            amount: checkoutItem.total * 100, // Amount in paise
+            currency: 'INR',
+            receipt: `order_${Date.now()}`,
+            notes: {
+                productId: checkoutItem.productId,
+                userId: req.user._id.toString(),
+                quantity: checkoutItem.quantity
+            }
+        };
+
+        const order = await razorpay.orders.create(options);
+        
+        res.json({
+            success: true,
+            orderId: order.id,
+            amount: order.amount,
+            currency: order.currency,
+            keyId: process.env.RAZORPAY_KEY_ID
+        });
+    } catch (error) {
+        console.error('Razorpay order creation error:', error);
+        res.json({ success: false, message: 'Failed to create payment order' });
+    }
+});
+
+// Verify Razorpay Payment
+router.post('/verify-razorpay-payment', isLoggedInUser, async (req, res) => {
+    try {
+        const { 
+            razorpay_order_id, 
+            razorpay_payment_id, 
+            razorpay_signature,
+            fullName,
+            phone,
+            address
+        } = req.body;
+
+        const checkoutItem = req.session.buyNowItem;
+        
+        if (!checkoutItem) {
+            return res.json({ success: false, message: 'No item selected for checkout' });
+        }
+
+        // Verify signature
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+            .update(body.toString())
+            .digest('hex');
+
+        if (expectedSignature !== razorpay_signature) {
+            return res.json({ success: false, message: 'Payment verification failed' });
+        }
+
+        // Create order in database
+        const orderModel = require('../models/order-model');
+        const trackingNumber = 'TRK' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase();
+
+        const newOrder = new orderModel({
+            user: req.user._id,
+            product: checkoutItem.productId,
+            quantity: checkoutItem.quantity,
+            selectedColor: checkoutItem.selectedColor,
+            selectedSize: checkoutItem.selectedSize,
+            price: checkoutItem.price,
+            total: checkoutItem.total,
+            shippingAddress: {
+                fullName: fullName,
+                phone: phone,
+                address: address
+            },
+            paymentMethod: 'razorpay',
+            orderStatus: 'confirmed',
+            paymentStatus: 'paid',
+            trackingNumber: trackingNumber,
+            razorpayOrderId: razorpay_order_id,
+            razorpayPaymentId: razorpay_payment_id,
+            razorpaySignature: razorpay_signature
+        });
+
+        await newOrder.save();
+
+        // Clear checkout session
+        delete req.session.buyNowItem;
+
+        res.json({
+            success: true,
+            message: 'Payment successful! Order placed.',
+            orderId: newOrder._id,
+            trackingNumber: trackingNumber
+        });
+    } catch (error) {
+        console.error('Payment verification error:', error);
+        res.json({ success: false, message: 'Payment verification failed' });
+    }
+});
 module.exports = router;

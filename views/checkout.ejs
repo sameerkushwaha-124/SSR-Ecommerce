@@ -148,6 +148,9 @@
     </div>
 </div>
 
+<!-- Razorpay Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
 document.getElementById('checkoutForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -163,14 +166,18 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
         const formData = new FormData(this);
         const paymentMethod = formData.get('paymentMethod');
 
-        if (paymentMethod === 'razorpay') {
-            // Razorpay is not implemented yet
-            showFlashMessage('error', 'Razorpay payment is not available yet. Please select Cash on Delivery.');
+        // Validate form
+        if (!formData.get('fullName') || !formData.get('phone') || !formData.get('address')) {
+            showFlashMessage('error', 'Please fill all shipping details');
             button.innerHTML = originalContent;
             button.disabled = false;
             return;
+        }
+
+        if (paymentMethod === 'razorpay') {
+            await processRazorpayPayment(formData);
         } else if (paymentMethod === 'cod') {
-            processOrder('cod');
+            await processOrder('cod', formData);
         } else {
             showFlashMessage('error', 'Please select a valid payment method.');
             button.innerHTML = originalContent;
@@ -185,10 +192,101 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
     }
 });
 
-async function processOrder(method) {
+async function processRazorpayPayment(formData) {
     try {
-        const formData = new FormData(document.getElementById('checkoutForm'));
+        // Create Razorpay order
+        const response = await fetch('/create-razorpay-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
 
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.message || 'Failed to create payment order');
+        }
+
+        // Razorpay options
+        const options = {
+            key: data.keyId,
+            amount: data.amount,
+            currency: data.currency,
+            name: 'SSR Ecommerce',
+            description: 'Product Purchase',
+            order_id: data.orderId,
+            handler: async function(response) {
+                await verifyPayment(response, formData);
+            },
+            prefill: {
+                name: formData.get('fullName'),
+                contact: formData.get('phone')
+            },
+            theme: {
+                color: '#3399cc'
+            },
+            modal: {
+                ondismiss: function() {
+                    const button = document.getElementById('placeOrderBtn');
+                    button.innerHTML = '<i class="ri-secure-payment-line mr-2"></i>Place Order - ₹<%= item.total.toLocaleString() %>';
+                    button.disabled = false;
+                }
+            }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+    } catch (error) {
+        console.error('Razorpay payment error:', error);
+        showFlashMessage('error', error.message || 'Failed to initiate payment');
+        const button = document.getElementById('placeOrderBtn');
+        button.innerHTML = '<i class="ri-secure-payment-line mr-2"></i>Place Order - ₹<%= item.total.toLocaleString() %>';
+        button.disabled = false;
+    }
+}
+
+async function verifyPayment(razorpayResponse, formData) {
+    try {
+        const response = await fetch('/verify-razorpay-payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                razorpay_order_id: razorpayResponse.razorpay_order_id,
+                razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+                razorpay_signature: razorpayResponse.razorpay_signature,
+                fullName: formData.get('fullName'),
+                phone: formData.get('phone'),
+                address: formData.get('address')
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showFlashMessage('success', `Payment successful! Order placed. Tracking: ${data.trackingNumber}`);
+            setTimeout(() => {
+                window.location.href = '/account?tab=orders';
+            }, 3000);
+        } else {
+            showFlashMessage('error', data.message || 'Payment verification failed');
+            const button = document.getElementById('placeOrderBtn');
+            button.innerHTML = '<i class="ri-secure-payment-line mr-2"></i>Place Order - ₹<%= item.total.toLocaleString() %>';
+            button.disabled = false;
+        }
+    } catch (error) {
+        console.error('Payment verification error:', error);
+        showFlashMessage('error', 'Payment verification failed');
+        const button = document.getElementById('placeOrderBtn');
+        button.innerHTML = '<i class="ri-secure-payment-line mr-2"></i>Place Order - ₹<%= item.total.toLocaleString() %>';
+        button.disabled = false;
+    }
+}
+
+async function processOrder(method, formData) {
+    try {
         const response = await fetch('/place-order', {
             method: 'POST',
             headers: {
