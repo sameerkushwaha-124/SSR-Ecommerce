@@ -1,43 +1,15 @@
 const mongoose = require('mongoose');
 
-const productsSchema = new mongoose.Schema({
-    name:{
-       type:String,
-    } ,
-    image:{
-        type:Buffer
-    },
-    price:{
-        type:Number
-    },
-    role:{
-        type:String,
-        required:true,
-        default:"product"
-    },
-    
-    discount:{
-        type:Number,
-        default:0
-    },
-    panelcolor:{
-        type:String
-    },
-    bgcolor:{
-        type:String
-    },
-    textcolor:{
-        type:String
-    },
-    description:{
-        type:String
-    },
-    category:{
-        type:String,
-        default:"other"
-    }
-}, {
-    timestamps: true // This adds createdAt and updatedAt fields
-})
+const productSchema = mongoose.Schema({
+  name: String,
+  image: Buffer,
+  price: Number,
+  discount: { type: Number, default: 0 },
+  description: String,
+  category: { type: String, default: "other" },
+  panelcolor: String,
+  bgcolor: String,
+  textcolor: String
+}, { timestamps: true });
 
-module.exports = mongoose.model('product',productsSchema);
+module.exports = mongoose.model('product', productSchema);
